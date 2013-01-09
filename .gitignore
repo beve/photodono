@@ -1,0 +1,7 @@
+src/dojo
+src/dijit
+src/dojox
+src/util
+node_modules
+npm-debug.log
+public/Photos/*

@@ -1,0 +1,56 @@
+extends layout
+
+block append head
+	title Pierre Alessandri -- Photos
+	link(href='http://fonts.googleapis.pcom/css?family=Quicksand:300,400,700', ref='stylesheet', type='text/css')
+	link(rel='stylesheet', href='/ext/bootstrap/css/bootstrap.css')
+	link(rel='stylesheet', href='/ext/wall/css/wall.css')
+	link(rel='stylesheet', href='/ext/simplemodal/css/simplemodal.css')
+	link(rel='stylesheet', href='/css/style.css')
+	script(src='/ext/mootools/mootools.js')
+	script(src='/ext/mootools/mootools.more.js')
+	script(src='/ext/simplemodal/js/simplemodal.js')
+	script(src='/js/init.js')
+	script(src='/ext/wall/js/wall.js')
+
+block body 
+	#pierre_container
+	#content
+
+		#container-top
+			#viewport-container
+				#prev(onclick="moveWall('prev')")
+				#viewport
+					#wall
+				#next(onclick="moveWall('prev')")
+
+		#container-mid
+			#logo
+				div
+					span#name Pierre Alessandri	/
+					span#title	Photographe
+				div#contact
+					block main-links
+					a(href='/contact', title='Contact') Contact
+
+			#main-content
+				block main-content
+					div#section-container1.section-container
+						div.cat-section#section1		
+						div.back-slider
+							div.cat-slider
+						div.clearfix						
+
+					div#section-container2.section-container
+						div.cat-section#section2		
+						div.back-slider
+							div.cat-slider
+						div.clearfix						
+
+					div#section-container2.section-container
+						div.cat-section#section3		
+						div.back-slider
+							div.cat-slider
+						div.clearfix
+
+					div.clearfix

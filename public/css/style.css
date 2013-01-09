@@ -1,0 +1,149 @@
+body {
+	background: #eff0f2;
+	font-family: 'Quicksand', sans-serif;
+}
+
+/* Viewport */
+
+#container-top {
+	width: 1200px;
+	margin: 100px auto 0 auto;
+}
+
+#viewport-container {
+	width: 1200px;
+}
+
+#viewport{
+    width:1100px;
+    height:300px;
+    position:relative;
+    overflow:hidden;
+    margin:0px auto;
+    background:#212121;
+		float: left;
+}
+
+#viewport-container #prev {
+	float: left;
+	width: 30px;
+	height: 32px;
+	background: url(../img/prev.png) no-repeat;
+	margin: 135px 12px 0px 0px;
+	cursor: pointer;
+}
+
+#viewport-container #next {
+	width: 30px;
+	height: 32px;
+	float: left;
+	background: url(../img/next.png) no-repeat;
+	margin: 135px 0px 0px 12px;
+	cursor: pointer;
+}
+/* Wall */
+#wall{
+    z-index:1;
+}
+
+#container-mid {
+	width: 1100px;
+	margin: 50px auto;
+}
+
+#container-mid #logo {
+	width: 480px;
+	float: left;
+}
+
+#container-mid #logo #name {
+	font-size: 2em;
+	color: #131e10
+}
+
+#container-mid #logo #title {
+	font-size: 2em;
+	color: #727272;
+}
+
+#container-mid #logo #contact {
+	margin-top: 35px;
+}
+
+#container-mid #logo #contact a {
+	color: #131e10
+}
+
+#container-mid #main-content
+{
+	float: left;
+	width: 610px;
+}
+
+.section-container {
+	float: left;
+	margin-left: 10px;
+	width: 190px;
+	height: 183px;
+	display: none;
+}
+
+.section-container .cat-section {
+	min-width: 175px;
+	width: 175px;
+	max-height: 180px;
+	height: 180px;
+	overflow: hidden;
+	float: left;
+}
+
+.cat-section-item {
+	margin-top: 5px;
+}
+
+.section-container .cat-backslider {
+	width: 10px;
+	height: 100%;
+	margin-left: 3px;
+	float: left;
+	background: url(../img/fondslider.png) no-repeat;
+}
+
+.section-container .cat-slider {
+	width: 6px;
+	margin-left: 2px;
+	margin-bottom: 5px;
+	height: 20px;
+	background: url(../img/slider.png) no-repeat;
+	cursor: pointer;
+}
+
+.form-horizontal .control-label {
+	width: 64px !important;
+}
+
+.form-horizontal .controls {
+	margin-left: 72px !important;
+}
+
+.form-horizontal input[type=submit] {
+}
+
+a {
+	color: #131e10;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #131e10;
+	cursor: pointer;
+}
+
+a.active {
+	font-weight: bold;
+}
+
+#simple-modal {
+	top: 20px !important;
+}
