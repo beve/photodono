@@ -14,12 +14,6 @@ dojoConfig = {
     name: "dojo",
     location: "dojo"
   },{
-    name: "dijit",
-    location: "dijit"
-  },{
-    name: "dojox",
-    location: "dojox"
-  },{
     name: "captain",
     location: "captain"
   }],
