@@ -2,9 +2,8 @@ var fs = require('fs');
 var stylus = require('stylus');
 var express = require('express');
 var photos = require('./src/captain/photos');
+var photosLib = new photos();
 var app = express();
-
-var photosList = null;
 
 // Config
 var configFile = 'config/config.json';
@@ -50,15 +49,14 @@ app.get('/', function(req, res) {
 });
 
 app.get('/photos', function(req, res) {
-  if (photosList === null) {
-    var photosLib = new photos();
-    photosLib.find('public/Photos', function(err, p) {
+  if (photosLib.photosList.photos.length === 0) {
+    photosLib.find('public/Photos', function(err) {
       if (err) throw err;
-      photosList = {photos: p};
-      res.json(photosList);
+      console.log(photosLib.photosList.photos.length);
+      res.json(photosLib.photosList);
     });
   } else {
-    res.json(photosList);
+    res.json(photosLib.photosList);
   }
 });
 
