@@ -1,3 +1,6 @@
 [submodule "public/ext/dojo"]
 	path = public/ext/dojo
 	url = https://github.com/dojo/dojo
+[submodule "public/ext/Smooth-Div-Scroll"]
+	path = public/ext/Smooth-Div-Scroll
+	url = https://github.com/tkahn/Smooth-Div-Scroll.git

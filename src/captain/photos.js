@@ -30,10 +30,31 @@ photos.prototype = {
 		});
 	},
 
+	findSync: function(dir, callback) {
+		var self = this;
+		var result = [];
+		var fList = fs.readdirSync(dir);
+		var pending = fList.length;
+		if (!pending) return callback(null, result);
+		fList.sort().forEach(function(file) {
+			file = dir + '/' + file;
+			var stat = fs.statSync(file);
+			if (stat && stat.isDirectory()) {
+				self.findSync(file, function(err, res) {
+					result = result.concat(res);
+					if (!--pending) callback(null, result);
+				});
+			} else {
+				result.push(file);
+				if (!--pending) callback(null, result);
+			}
+		});
+	},
+
 	populateFileList: function(dir, callback) {
 		var self = this;
-		this.find(dir, function(err, result) {
-			if (err) throw err;
+		this.findSync(dir, function(err, result) {
+			if (err) callback(err);
 			result.forEach(function(file, index, array) {
 				var current = self.list;
 				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
@@ -42,8 +63,8 @@ photos.prototype = {
 							if (!current[element]) current[element] = {};
 							current = current[element];
 						} else {
-							if (!current['img']) current['img'] = [];
-							current['img'].push(element);
+							if (!current['files']) current['files'] = [];
+							current['files'].push(element);
 						}
 					});
 				}

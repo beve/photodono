@@ -2,19 +2,20 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/Evented'], func
 
   return declare([Evented], {
 
-    photosList: [],
-    
     constructor: function () {
+      this.photosList = [];
     },
 
-    getList: function() {
-      var self = this;
-      request("/photos").then(function(list) {
-        self.photosList = JSON.parse(list, true);
-        self.emit("photosLoaded");
-      });
+    getList: function(callback) {
+      request("/photos", {handleAs:'json'}).then(
+         function(list) {
+           callback(null, list);
+         },
+         function(err) {
+           console.log(err); 
+         }
+       );
+     }
 
-    }
-  });
-
-})
+   });
+});
