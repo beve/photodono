@@ -1,8 +1,7 @@
 var fs = require('fs');
 var stylus = require('stylus');
 var express = require('express');
-var photos = require('./src/captain/photos');
-var photosLib = new photos();
+var photosMod = require('./src/captain/photos');
 var app = express();
 
 // Config
@@ -20,46 +19,47 @@ if (!fs.existsSync(configFile)) {
   }
 }
 
+// Get photos list
+var photos = new photosMod();
+photos.populateFileList('public/Photos', function(err) {
+  if (err) throw err;
+  initExpress();
+});
+
 function compile(str, path){
   return stylus(str).
   set("filename", path).
   use(nib());
 }
 
-app.configure(function(){
-  app.set('views', 'views');
-  app.set('view engine', 'jade');
-  app.use(express.favicon('public/img/favicon.ico'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(express.cookieParser(config.secret));
-  app.use(express.static('public'));
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-  app.use(app.router);
-  app.use(stylus.middleware({
-    src: 'views',
-    dest: 'public',
-    compile: compile,
-    compress: true
-  }));
-});
+function initExpress() {
+  app.configure(function(){
+    app.set('views', 'views');
+    app.set('view engine', 'jade');
+    app.use(express.favicon('public/img/favicon.ico'));
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
+    app.use(express.cookieParser(config.secret));
+    app.use(express.static('public'));
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    app.use(app.router);
+    app.use(stylus.middleware({
+      src: 'views',
+      dest: 'public',
+      compile: compile,
+      compress: true
+    }));
+  });
 
-app.get('/', function(req, res) {
-  res.render('index', {});
-});
+  app.get('/', function(req, res) {
+    res.render('index', {});
+  });
 
-app.get('/photos', function(req, res) {
-  if (photosLib.photosList.photos.length === 0) {
-    photosLib.find('public/Photos', function(err) {
-      if (err) throw err;
-      console.log(photosLib.photosList.photos.length);
-      res.json(photosLib.photosList);
-    });
-  } else {
-    res.json(photosLib.photosList);
-  }
-});
+  app.get('/photos', function(req, res) {
+     res.json(photos.list);
+  });
 
-// Start server
-app.listen(config.server.port);
-console.log('Server ready');
+  // Start server
+  app.listen(config.server.port);
+  console.log('Server ready');
+}
