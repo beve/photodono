@@ -1,7 +1,7 @@
 var fs = require('fs');
 var stylus = require('stylus');
 var express = require('express');
-var photosMod = require('./src/captain/photos');
+var photosMod = require('./src/server/photos');
 var app = express();
 
 // Config
