@@ -20,16 +20,21 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang', 'd
      },
 
     getListFromPath: function(dottedPath) {
-       return this.getFiles(lang.getObject(dottedPath, false, this.list));
+       return this.getFiles(lang.getObject(dottedPath, false, this.list), dottedPath.replace('.', '/'));
     },
 
-    getFiles: function(obj) {
+    getFiles: function(obj, p) {
       var result = [];
+      var filePath = p || '/';
       for(var key in obj){
           if(key == 'files' && typeof(obj[key] == 'array') ){
-            result = result.concat(obj.files);
+            //result = result.concat(obj.files);
+            obj.files.forEach(function(file) {
+              console.log(' 00 '+filePath);
+              result.push('Photos/'+filePath+'/'+file);
+            });
           } else if (typeof obj[key] == 'object') {
-            result = result.concat(this.getFiles(obj[key]));
+            result = result.concat(this.getFiles(obj[key], filePath+'/'+key));
           }
       }
       return result;
