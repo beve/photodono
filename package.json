@@ -14,10 +14,11 @@
 		"express"             : "latest",
 		"jade"                : "latest",
 		"nib "                : "latest",
-		"validator"						:	"latest",
+		"chai"								:	"latest",
 		"nodemailer"					:	"latest",
 		"stylus"							:	"latest",
-		"formidable"					:	"latest"
+		"gm"									:	"latest",
+		"adm-zip"							: "latest"
 	},
 	"bin": { 
 		"captain": "server.js" 

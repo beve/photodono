@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var AdmZip = require('adm-zip');
 
 var photos = module.exports = function photos() {
 	this.list = {};
@@ -71,6 +72,21 @@ photos.prototype = {
 			});
 			callback(null);
 		});
+	},
+
+	unzip: function(file) {
+		console.log('File to extract: '+file);
+
+		var zip = new AdmZip(file);
+/*
+		var zipEntries = zip.getEntries();
+
+		zipEntries.forEach(function(zipEntry) {
+			console.log(zipEntry.toString());
+			console.log(zipEntry.entryName);
+		});
+
+*/
 	}
 
 };

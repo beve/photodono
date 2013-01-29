@@ -1,0 +1,14 @@
+extends layout
+
+block append body
+ - if (error) {
+   div= error
+ - }
+ div login
+  form(method='post', action='/login')
+    div
+      input(type='text', name='login')
+    div
+      input(type='password', name='passwd')
+    div
+      input(type='submit', value='go')

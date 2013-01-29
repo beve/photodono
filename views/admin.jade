@@ -1,0 +1,9 @@
+extends layout
+
+block append body
+  form(method='post', action='/upload', enctype='multipart/form-data')
+    div
+      input(type='file', name='photoszip', multiple='multiple')
+    div
+      input(type='submit', name='submit', value='go')
+

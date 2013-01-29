@@ -32,16 +32,36 @@ function compile(str, path){
   use(nib());
 }
 
+// Plug real authentification
+function authenticate(login, passwd, callback) {
+  console.log(passwd+' == '+config.pass);
+  if (login == 'admin' && passwd == config.pass) {
+    callback(null, true);
+  } else {
+    return callback(new Error("login failed"));
+  }
+}
+
+function restrict(req, res, next) {
+  if (req.session.isAuthenticated) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    res.redirect('/login');
+  }
+}
+
 function initExpress() {
   app.configure(function(){
     app.set('views', 'views');
     app.set('view engine', 'jade');
     app.use(express.favicon('public/img/favicon.ico'));
-    app.use(express.bodyParser());
+    app.use(express.bodyParser({uploadDir: __dirname+'/tmp' }));
     app.use(express.methodOverride());
     app.use(express.cookieParser(config.secret));
     app.use(express.static('public'));
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    app.use(express.session());
     app.use(app.router);
     app.use(stylus.middleware({
       src: 'views',
@@ -58,6 +78,50 @@ function initExpress() {
   app.get('/photos', function(req, res) {
      res.json(photos.list);
   });
+	
+	app.get('/admin', restrict, function(req, res) {
+    res.render('admin', {});
+	});
+
+  app.get('/login', function(req, res) {
+    res.render('login', {error: req.session.error});
+  });
+
+  app.get('/logout', function (req, res) {
+    req.session.destroy(function() {
+      res.redirect('/');
+    });
+  });
+
+  app.post('/login', function(req, res) {
+    authenticate(req.body.login, req.body.passwd, function(err, isAuthenticated) {
+      console.log(req.params.passwd);
+      if (err) {
+        req.session.error = 'Bad login';
+        res.redirect('login');
+      } else {
+        delete req.session.error;
+        req.session.isAuthenticated = isAuthenticated;
+        res.redirect('/admin');
+      }
+    });
+  });
+
+	app.post('/upload', restrict, function(req, res, callback) {
+    if (!req.files.photoszip) {
+      return callback(new Error('no file provided'));
+    }
+    var zip = req.files.photoszip;
+
+    if (zip.type != 'application/zip') {
+      return callback(new Error('It is not a valid zip file'));
+    }
+
+    if (zip.size === 0) {
+      return callback(new Error('File is empty'));
+    }
+    photos.unzip(zip.path);
+	});
 
   // Start server
   app.listen(config.server.port);
