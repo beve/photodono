@@ -118,7 +118,8 @@ function initExpress() {
     if (zip.size === 0) {
       return callback(new Error('File is empty'));
     }
-    photos.unzip(zip.path, __dirname+'/tmp');
+    var files = photos.unzip(zip.path, __dirname+'/tmp');
+    photos.buildThumbnail(files);
 	});
 
   // Start server

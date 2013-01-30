@@ -3,6 +3,7 @@ var path = require('path');
 var unzip = require('unzip');
 var fstream = require('fstream');
 var zipfile = require('zipfile');
+var gm = require('gm');
 
 var photos = module.exports = function photos() {
 	this.list = {};
@@ -77,35 +78,31 @@ photos.prototype = {
 	},
 
 	unzip: function(file, root) {
-		//var zip = new admZip(file);
-		var zip = new zipfile.ZipFile('/home/beve/test/gfd.zip');
+		var files = [];
+		var zip = new zipfile.ZipFile(file);
 		for(i=0; i< zip.count; i++) {
-			var dir = path.basename(zip.names[i]);
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, 0755);
-			}
-			if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
-				console.log(zip.names[i]);
-				fs.writeFileSync(zip.names[i], zip.readFileSync(zip.names[i]));
+			var dir = root+path.sep+path.dirname(zip.names[i]);
+			if (zip.names[i].split(path.sep)[0] != '__MACOSX') {
+				if (!fs.existsSync(dir)) {
+					fs.mkdirSync(dir, 0755);
+				}
+				if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
+					files.push(root+path.sep+zip.names[i]);
+					fs.writeFileSync(root+path.sep+zip.names[i], zip.readFileSync(zip.names[i]));
+				}
 			}
 		}
-		/*
-		var writeStream;
-		fs.createReadStream(file)
-		.pipe(unzip.Parse())
-		.on('error', function(err) {
-			console.log(err);
-		})
-		.on('entry', function (entry) {
-			if (entry.type == 'Directory' && !fs.existsSync(entry.path)) {
-				//fs.mkdirSync(root+'/'+entry.path);
-			} else if (entry.type == 'File') {
-				writeStream = fstream.Writer(root+'/'+entry.path);
-				console.log(entry._writableState);
-				writeStream.write('toto');
-			}
+		return files;
+	},
+
+	buildThumbnail: function(fileList) {
+		var done = 0;
+		fileList.forEach(function(original) {
+			var filename = path.dirname(original)+path.sep+original.split(+'_min'+path.extname(original);
+			gm(original).resize(400, 400).write(filename, function(err) {
+				if (err) console.log(err);
+			});
 		});
-*/
 	}
 
 }
