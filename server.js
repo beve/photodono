@@ -3,6 +3,7 @@ var stylus = require('stylus');
 var express = require('express');
 var photosMod = require('./src/server/photos');
 var app = express();
+var path = require('path');
 
 // Config
 var configFile = 'config/config.json';
@@ -21,7 +22,7 @@ if (!fs.existsSync(configFile)) {
 
 // Get photos list
 var photos = new photosMod();
-photos.populateFileList('public/Photos', function(err) {
+photos.populateFileList(config.photosdir, function(err) {
   if (err) throw err;
   initExpress();
 });
@@ -118,8 +119,10 @@ function initExpress() {
     if (zip.size === 0) {
       return callback(new Error('File is empty'));
     }
-    var files = photos.unzip(zip.path, __dirname+'/tmp');
-    photos.buildThumbnail(files);
+    var files = photos.unzip(zip.path, __dirname+path.sep+config.tmpdir);
+    var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min');
+    var images = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.photo.w, config.photo.h);
+
 	});
 
   // Start server

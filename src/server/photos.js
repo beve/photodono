@@ -1,9 +1,8 @@
 var fs = require('fs');
 var path = require('path');
-var unzip = require('unzip');
-var fstream = require('fstream');
 var zipfile = require('zipfile');
 var gm = require('gm');
+var mkdirp = require('mkdirp');
 
 var photos = module.exports = function photos() {
 	this.list = {};
@@ -62,7 +61,7 @@ photos.prototype = {
 			result.forEach(function(file, index, array) {
 				var current = self.list;
 				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
-					file.replace('public/Photos/', '').split(path.sep).forEach(function(element, index, array) {
+					file.replace(dir, '').split(path.sep).forEach(function(element, index, array) {
 						if (index < array.length-1) {
 							if (!current[element]) current[element] = {};
 							current = current[element];
@@ -79,15 +78,16 @@ photos.prototype = {
 
 	unzip: function(file, root) {
 		var files = [];
+		root = path.normalize(root);
 		var zip = new zipfile.ZipFile(file);
 		for(i=0; i< zip.count; i++) {
 			var dir = root+path.sep+path.dirname(zip.names[i]);
 			if (zip.names[i].split(path.sep)[0] != '__MACOSX') {
-				if (!fs.existsSync(dir)) {
-					fs.mkdirSync(dir, 0755);
-				}
 				if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
-					files.push(root+path.sep+zip.names[i]);
+					if (!fs.existsSync(dir)) {
+						mkdirp.sync(dir, 0755);
+					}
+					files.push(path.sep+zip.names[i]);
 					fs.writeFileSync(root+path.sep+zip.names[i], zip.readFileSync(zip.names[i]));
 				}
 			}
@@ -95,14 +95,25 @@ photos.prototype = {
 		return files;
 	},
 
-	buildThumbnail: function(fileList) {
-		var done = 0;
-		fileList.forEach(function(original) {
-			var filename = path.dirname(original)+path.sep+original.split(+'_min'+path.extname(original);
-			gm(original).resize(400, 400).write(filename, function(err) {
+	buildThumbnail: function(fileList, tmpdir, destdir, w, h, s) {
+		var suffix = s || '';
+		var files = [];
+		tmpdir = path.normalize(tmpdir);
+		destdir = path.normalize(destdir);
+		fileList.forEach(function(orig) {
+			original = tmpdir+orig;
+			var dir = destdir+path.dirname(orig);
+			var filename = dir+path.sep+path.basename(orig, path.extname(orig))+suffix+path.extname(orig);
+			console.log(filename);
+			if (!fs.existsSync(dir)) {
+				mkdirp.sync(dir, 0755);
+			}
+			gm(original).resize(w, h).write(filename, function(err) {
 				if (err) console.log(err);
+				else files.push(filename);
 			});
 		});
+		return files;
 	}
 
 }

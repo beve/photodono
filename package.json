@@ -18,7 +18,7 @@
 		"nodemailer"					:	"latest",
 		"stylus"							:	"latest",
 		"gm"									:	"latest",
-		"fstream"							:	"latest",
+		"mkdirp"							:	"latest",
 		"zipfile"							: "latest"
 	},
 	"bin": { 

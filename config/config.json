@@ -6,5 +6,15 @@
 		"level": "ALL"
 	},
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
+	"tmpdir": "tmp",
+	"photosdir": "public/Photos",
+	"thumb": {
+		"w" : 200,
+		"h" : 200
+	},
+	"photo" : {
+		"w" : 600,
+		"h" : 600
+	},
   "pass": "pouet"
 }
