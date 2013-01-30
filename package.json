@@ -18,7 +18,8 @@
 		"nodemailer"					:	"latest",
 		"stylus"							:	"latest",
 		"gm"									:	"latest",
-		"adm-zip"							: "latest"
+		"fstream"							:	"latest",
+		"zipfile"							: "latest"
 	},
 	"bin": { 
 		"captain": "server.js" 

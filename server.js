@@ -34,7 +34,6 @@ function compile(str, path){
 
 // Plug real authentification
 function authenticate(login, passwd, callback) {
-  console.log(passwd+' == '+config.pass);
   if (login == 'admin' && passwd == config.pass) {
     callback(null, true);
   } else {
@@ -79,7 +78,7 @@ function initExpress() {
      res.json(photos.list);
   });
 	
-	app.get('/admin', restrict, function(req, res) {
+	app.get('/admin', function(req, res) {
     res.render('admin', {});
 	});
 
@@ -95,7 +94,6 @@ function initExpress() {
 
   app.post('/login', function(req, res) {
     authenticate(req.body.login, req.body.passwd, function(err, isAuthenticated) {
-      console.log(req.params.passwd);
       if (err) {
         req.session.error = 'Bad login';
         res.redirect('login');
@@ -107,7 +105,7 @@ function initExpress() {
     });
   });
 
-	app.post('/upload', restrict, function(req, res, callback) {
+	app.post('/upload', function(req, res, callback) {
     if (!req.files.photoszip) {
       return callback(new Error('no file provided'));
     }
@@ -120,7 +118,7 @@ function initExpress() {
     if (zip.size === 0) {
       return callback(new Error('File is empty'));
     }
-    photos.unzip(zip.path);
+    photos.unzip(zip.path, __dirname+'/tmp');
 	});
 
   // Start server

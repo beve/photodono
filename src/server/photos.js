@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
-var AdmZip = require('adm-zip');
+var unzip = require('unzip');
+var fstream = require('fstream');
+var zipfile = require('zipfile');
 
 var photos = module.exports = function photos() {
 	this.list = {};
@@ -74,19 +76,36 @@ photos.prototype = {
 		});
 	},
 
-	unzip: function(file) {
-		console.log('File to extract: '+file);
-
-		var zip = new AdmZip(file);
-/*
-		var zipEntries = zip.getEntries();
-
-		zipEntries.forEach(function(zipEntry) {
-			console.log(zipEntry.toString());
-			console.log(zipEntry.entryName);
+	unzip: function(file, root) {
+		//var zip = new admZip(file);
+		var zip = new zipfile.ZipFile('/home/beve/test/gfd.zip');
+		for(i=0; i< zip.count; i++) {
+			var dir = path.basename(zip.names[i]);
+			if (!fs.existsSync(dir)) {
+				fs.mkdirSync(dir, 0755);
+			}
+			if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
+				console.log(zip.names[i]);
+				fs.writeFileSync(zip.names[i], zip.readFileSync(zip.names[i]));
+			}
+		}
+		/*
+		var writeStream;
+		fs.createReadStream(file)
+		.pipe(unzip.Parse())
+		.on('error', function(err) {
+			console.log(err);
+		})
+		.on('entry', function (entry) {
+			if (entry.type == 'Directory' && !fs.existsSync(entry.path)) {
+				//fs.mkdirSync(root+'/'+entry.path);
+			} else if (entry.type == 'File') {
+				writeStream = fstream.Writer(root+'/'+entry.path);
+				console.log(entry._writableState);
+				writeStream.write('toto');
+			}
 		});
-
 */
 	}
 
-};
+}
