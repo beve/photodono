@@ -5,6 +5,8 @@ require(['photos', 'dojo/store/Memory', 'dojo/store/Observable',
   p.getList(function(err) {
     if (!err) {
 
+      console.log(p.list);
+
       var photosStore = new Memory({
         data: p.list,
         getChildren: function(object){
