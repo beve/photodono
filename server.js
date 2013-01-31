@@ -75,7 +75,7 @@ function initExpress() {
     res.render('index', {});
   });
 
-  app.get('/photos', function(req, res) {
+  app.get('/getList', function(req, res) {
      res.json(photos.list);
   });
 	

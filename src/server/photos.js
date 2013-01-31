@@ -80,7 +80,6 @@ photos.prototype = {
 		var self = this;
 		var objectStoreModel = [{id: '/', name: 'Root'}];
 		var aDir = ['/'];
-
 		this.findSync(photosdir, function(err, result) {
 			if (err) callback(err);
 			result.forEach(function(file, index, array) {
@@ -96,10 +95,10 @@ photos.prototype = {
 						objectStoreModel.push({id: dir, name: dir, type: 'dir', parent: dirParent});
 						aDir.push(filepath);
 					}
-					objectStoreModel.push({id: index, name: photo, type: 'file', path: filepath, parent: fileParent});
+					//objectStoreModel.push({id: index, name: photo, type: 'file', path: filepath, parent: fileParent});
 				}
 			});
-			this.list = objectStoreModel;
+			self.list = objectStoreModel;
 			callback(null);
 		});
 	},

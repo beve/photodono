@@ -1,5 +1,12 @@
 extends layout
 
+block append head
+  link(rel='stylesheet', href='/css/style.css')
+  link(rel='stylesheet', href='/ext/dijit/themes/claro/claro.css')
+  script
+    require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/AccordionContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionPane"]);
+  script(src='/js/admin.js')
+
 block append body
   form(method='post', action='/upload', enctype='multipart/form-data')
     div
@@ -7,3 +14,5 @@ block append body
     div
       input(type='submit', name='submit', value='go')
 
+
+    div#tree

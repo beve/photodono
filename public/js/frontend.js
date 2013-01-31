@@ -5,8 +5,9 @@ require(['simplegrid', 'photos', 'dojo/domReady!'], function(simpleGrid, photos)
 
   p.getList(function(err) {
     if (!err) {
-      var f = p.getListFromPath(path);
-      grid.adopt(f);
+      //var f = p.getListFromPath(path);
+      //grid.adopt(f);
+      //console.log(p.list);
     }
   });
 
