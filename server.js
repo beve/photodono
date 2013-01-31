@@ -115,13 +115,18 @@ function initExpress() {
     if (zip.type != 'application/zip') {
       return callback(new Error('It is not a valid zip file'));
     }
-
     if (zip.size === 0) {
       return callback(new Error('File is empty'));
     }
+
     var files = photos.unzip(zip.path, __dirname+path.sep+config.tmpdir);
+    fs.unlinkSync(zip.path);
+
     var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min');
     var images = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.photo.w, config.photo.h);
+      console.log(images);
+
+    res.redirect('/admin');
 
 	});
 

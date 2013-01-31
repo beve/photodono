@@ -54,7 +54,7 @@ photos.prototype = {
 		});
 	},
 
-	populateFileList: function(dir, callback) {
+	populateFileListOld: function(dir, callback) {
 		var self = this;
 		this.findSync(dir, function(err, result) {
 			if (err) callback(err);
@@ -72,6 +72,34 @@ photos.prototype = {
 					});
 				}
 			});
+			callback(null);
+		});
+	},
+
+	populateFileList: function(photosdir, callback) {
+		var self = this;
+		var objectStoreModel = [{id: '/', name: 'Root'}];
+		var aDir = ['/'];
+
+		this.findSync(photosdir, function(err, result) {
+			if (err) callback(err);
+			result.forEach(function(file, index, array) {
+				file = file.replace(photosdir, '');
+				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
+					var photo = path.basename(file);
+					var filepath = path.dirname(file);
+					var tmp = path.dirname(file).split(path.sep);
+					var dirParent = (tmp[tmp.length-2] !== '') ? tmp[tmp.length-2] : '/';
+					var fileParent = (tmp[tmp.length-1] !== '') ? tmp[tmp.length-1] : '/';
+					if (aDir.indexOf(filepath) == -1) {
+						var dir = tmp.pop();
+						objectStoreModel.push({id: dir, name: dir, type: 'dir', parent: dirParent});
+						aDir.push(filepath);
+					}
+					objectStoreModel.push({id: index, name: photo, type: 'file', path: filepath, parent: fileParent});
+				}
+			});
+			this.list = objectStoreModel;
 			callback(null);
 		});
 	},
