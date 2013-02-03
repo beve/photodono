@@ -78,13 +78,13 @@ photos.prototype = {
 
 	populateFileList: function(photosdir, callback) {
 		var self = this;
-		var objectStoreModel = [{id: '/', name: 'Root'}];
+		var objectStoreModel = [{id: '/', name: 'Root', type: 'dir'}];
 		var aDir = ['/'];
 		this.findSync(photosdir, function(err, result) {
 			if (err) callback(err);
 			result.forEach(function(file, index, array) {
 				file = file.replace(photosdir, '');
-				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
+				if ((file.indexOf('_min') == -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
 					var photo = path.basename(file);
 					var filepath = path.dirname(file);
 					var tmp = path.dirname(file).split(path.sep);
