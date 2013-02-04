@@ -14,7 +14,6 @@ block append body
     div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'leading', splitter:true", style='width:250px')
       div#tree
     div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:false")
-      form(method='post', action='/upload', enctype='multipart/form-data')
 
   div(data-dojo-type='dijit/Dialog', id='popupRename', title='Rename')
     input(data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true', type='text', name='newname')
@@ -29,5 +28,6 @@ block append body
     input(data-dojo-type='dijit/form/Button', showLabel: true", type='submit', label='submit', value='Create the directory')
 
   div(data-dojo-type='dijit/Dialog', id='popupUpload', title='Upload')
-    input(type='file', name='photoszip', multiple='multiple')
-    input(data-dojo-type='dijit/form/Button',data-dojo-props="iconClass:'dijitEditorIcon dijitEditorIconCut', showLabel: true", type='submit', label='submit', value='Submit file')
+    form(method='post', action='/upload', enctype='multipart/form-data')
+      input(type='file', name='photoszip', multiple='multiple')
+      input(data-dojo-type='dijit/form/Button',data-dojo-props="iconClass:'dijitEditorIcon dijitEditorIconCut', showLabel: true", type='submit', label='submit', value='Submit file')

@@ -3,6 +3,7 @@ var path = require('path');
 var zipfile = require('zipfile');
 var gm = require('gm');
 var mkdirp = require('mkdirp');
+var rimraf = require('rimraf');
 
 var photos = module.exports = function photos() {
 	this.list = {};
@@ -84,7 +85,7 @@ photos.prototype = {
 			if (err) callback(err);
 			result.forEach(function(file, index, array) {
 				file = file.replace(photosdir, '');
-				if ((file.indexOf('_min') == -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
+				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
 					var photo = path.basename(file);
 					var filepath = path.dirname(file);
 					var tmp = path.dirname(file).split(path.sep);
@@ -94,7 +95,7 @@ photos.prototype = {
 						tmp.forEach(function(d, i) {
 							if (i == 1) {
 								if (aDir.indexOf(d) == -1) {
-									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath.replace(path.sep+d, ''), parent: '/'});
+									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath, parent: '/'});
 									aDir.push(d);
 								}
 							} else if (i > 1) {
@@ -105,7 +106,7 @@ photos.prototype = {
 							}
 						});
 					}
-					objectStoreModel.push({id: index, name: photo, type: 'file', path: filepath, parent: fileParent});
+					objectStoreModel.push({id: index, name: photo.replace('_min', ''), type: 'file', path: filepath+path.sep+photo, parent: fileParent});
 				}
 			});
 			self.list = objectStoreModel;
@@ -132,25 +133,38 @@ photos.prototype = {
 		return files;
 	},
 
-	buildThumbnail: function(fileList, tmpdir, destdir, w, h, s) {
+	buildThumbnail: function(fileList, tmpdir, destdir, w, h, s, callback) {
 		var suffix = s || '';
 		var files = [];
+		var done = 0;
 		tmpdir = path.normalize(tmpdir);
 		destdir = path.normalize(destdir);
 		fileList.forEach(function(orig) {
 			original = tmpdir+orig;
 			var dir = destdir+path.dirname(orig);
 			var filename = dir+path.sep+path.basename(orig, path.extname(orig))+suffix+path.extname(orig);
-			console.log(filename);
 			if (!fs.existsSync(dir)) {
 				mkdirp.sync(dir, 0755);
 			}
 			gm(original).resize(w, h).write(filename, function(err) {
-				if (err) console.log(err);
-				else files.push(filename);
+				if (!err) {
+					files.push(filename);
+					if (fileList.length == files.length && callback) {
+						return callback(null, files);
+					}
+				}
 			});
 		});
-		return files;
+	},
+
+	del: function(path, callback) {
+	  if (!callback) return new Error("No callback passed to del()");
+		// Hard coded to avoid bio hazard
+		if (path.indexOf('Photos') == -1) {
+			return new Error("No Photos/ in path, abording delete");
+		} else {
+			rimraf(path, callback);
+		}
 	}
 
 }

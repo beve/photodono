@@ -93,6 +93,15 @@ function initExpress() {
     });
   });
 
+  app.get('/delete', function (req, res) {
+    if (!req.query.path) throw new Error('No Path provided');
+    photos.del(req.query.path, function(err, result) {
+      if (!err) {
+        res.json(result);
+      }
+    });
+  });
+
   app.post('/login', function(req, res) {
     authenticate(req.body.login, req.body.passwd, function(err, isAuthenticated) {
       if (err) {
@@ -122,11 +131,17 @@ function initExpress() {
     var files = photos.unzip(zip.path, __dirname+path.sep+config.tmpdir);
     fs.unlinkSync(zip.path);
 
-    var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min');
-    var images = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.photo.w, config.photo.h);
-      console.log(images);
+    var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min', function(err, files) {
+        if (!err) {
+          photos.populateFileList(config.photosdir, function(err) {
+            if (!err) {
+              res.redirect('/admin');
+            }
+          });
+        }
+      });
 
-    res.redirect('/admin');
+    var images = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.photo.w, config.photo.h, '');
 
 	});
 

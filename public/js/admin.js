@@ -44,16 +44,17 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
         onClick: function(item) {
           var mainMenu = registry.byId('mainMenu');
           array.forEach(mainMenu.getChildren(), function(child) {
-            if (tree.selectedItems.length == 1 && (tree.selectedItems[0].type == 'dir' || (array.indexOf(fileButtons, child.get('action')) != -1))) {
+            child.set('disabled', true);
+            if (item.parent && tree.selectedItems.length == 1 && (tree.selectedItems[0].type == 'dir' || (array.indexOf(fileButtons, child.get('action')) != -1))) {
               child.set('disabled', false);
+            } else if (!item.parent) {
+              if (array.indexOf(fileButtons, child.get('action')) == -1) {
+                child.set('disabled', false);
+              }
             } else if (tree.selectedItems.length > 1){
               if (array.indexOf(multipleButtons, child.get('action')) != -1) {
                 child.set('disabled', false);
-              } else {
-                child.set('disabled', true);
               }
-            } else {
-              child.set('disabled', true);
             }
           });
         }
@@ -97,11 +98,18 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
     });
 
     on(registry.byId('mainMenuBtnDeleteConfirm'), 'click', function(evt) {
-      // SEND
+      request.get("/delete", {query: {path: 'pouet/poeut/pouet'}, handleAs:'json'}).then(
+        function(res) {
+         console.log(res);
+        },
+        function(err) {
+          console.log(err);
+        });
       topic.publish('mainMenuButtonPressed', this.id);
     });
 
     on(registry.byId('mainMenuBtnNewDirectory'), 'click', function(evt) {
+      photosStore.empty();
       registry.byId('popupNewDirectory').show();
       topic.publish('mainMenuButtonPressed', this.id);
     });

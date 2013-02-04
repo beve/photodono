@@ -7,6 +7,7 @@ Install:
 
 git submodules init
 git submodules update --recursive
+npm install
 
 
 

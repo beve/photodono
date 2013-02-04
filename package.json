@@ -19,7 +19,8 @@
 		"stylus"							:	"latest",
 		"gm"									:	"latest",
 		"mkdirp"							:	"latest",
-		"zipfile"							: "latest"
+		"zipfile"							: "latest",
+		"rimraf"							: "latest"
 	},
 	"bin": { 
 		"captain": "server.js" 
