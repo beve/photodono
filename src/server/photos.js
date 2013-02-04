@@ -94,24 +94,20 @@ photos.prototype = {
 						tmp.forEach(function(d, i) {
 							if (i == 1) {
 								if (aDir.indexOf(d) == -1) {
-									objectStoreModel.push({id: d, name: d, type: 'dir', parent: '/'});
+									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath.replace(path.sep+d, ''), parent: '/'});
 									aDir.push(d);
 								}
 							} else if (i > 1) {
 								if (aDir.indexOf(d) == -1) {
-									objectStoreModel.push({id: d, name: d, type: 'dir', parent: tmp[i-1]});
+									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath.replace(path.sep+d, ''), parent: tmp[i-1]});
 									aDir.push(d);
 								}
 							}
 						});
-						//var dir = tmp.pop();
-						//objectStoreModel.push({id: dir, name: dir, type: 'dir', parent: dirParent});
-						//aDir.push(filepath);
 					}
 					objectStoreModel.push({id: index, name: photo, type: 'file', path: filepath, parent: fileParent});
 				}
 			});
-console.log(objectStoreModel);
 			self.list = objectStoreModel;
 			callback(null);
 		});
