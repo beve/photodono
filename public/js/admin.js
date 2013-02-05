@@ -7,12 +7,11 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
   var multipleButtons = ['Delete'];
 
   p.getList(function(err) {
-    console.log(p.fileList);
     if (!err) {
       var photosStore = new Memory({
-        data: p.dirList,
+        data: p.list,
         getChildren: function(object){
-          return this.query({parent: object.id});
+          return this.query({parent: object.id, type: 'dir'});
         }
 
       });
@@ -27,7 +26,7 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
           }
         });
 
-      aspect.around(photosStore, "put", function(originalPut){
+      aspect.around(photosStore, 'put', function(originalPut){
         return function(obj, target){
           if (target && target.parent){
             obj.parent = target.parent.id;
@@ -60,8 +59,7 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
           });
         },
         getIconClass: function(item, opened){
-          console.log(item);
-          return (opened ? "dijitFolderOpened" : "dijitFolderClosed");
+          return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
         },
       }, "tree");
       tree.startup();
@@ -77,10 +75,7 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
     menu.addChild(new MenuItem({
         label: "Delete",
         onClick: function(evt){
-           // var node = this.getParent().currentTarget;
-            //var selectedObject = tree.get("selectedItems")[0];
-            //console.log(selectedObject);
-            console.log(tree);
+          console.log('click');
         }
     }));
 

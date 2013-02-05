@@ -7,60 +7,18 @@ var rimraf = require('rimraf');
 var findit = require('findit')
 
 var photos = module.exports = function photos() {
-	this.dirList = {};
-	this.fileList = {};
+	this.list = {};
 };
 
 photos.prototype = {
 
-	findSync: function(dir, callback) {
-		var self = this;
-		var result = [];
-		var fList = fs.readdirSync(dir);
-		var pending = fList.length;
-		if (!pending) return callback(null, result);
-		fList.sort().forEach(function(file) {
-			file = dir + '/' + file;
-			var stat = fs.statSync(file);
-			if (stat && stat.isDirectory()) {
-				self.findSync(file, function(err, res) {
-					result = result.concat(res);
-					if (!--pending) callback(null, result);
-				});
-			} else {
-				result.push(file);
-				if (!--pending) callback(null, result);
-			}
-		});
-	},
-
-	populateFileList: function(dir, callback) {
-		var self = this;
-		this.findSync(dir, function(err, result) {
-			if (err) callback(err);
-			result.forEach(function(file, index, array) {
-				var current = self.fileList;
-				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
-					file.replace(dir, '').split(path.sep).forEach(function(element, index, array) {
-						if (index < array.length-1) {
-							if (!current[element]) current[element] = {};
-							current = current[element];
-						} else {
-							if (!current['files']) current['files'] = [];
-							current['files'].push(element);
-						}
-					});
-				}
-			});
-		});
-	},
-
-	populateDirList: function(photosdir, callback) {
+	getList: function(photosdir, callback) {
 		var aDir = ['/'];
 		var dirNum = 0;
+		var fileNum = 1000;
 		var finder = findit.find(photosdir);
 		var self = this;
-		var objectStoreModel = [{id: 0, name: 'root'}];
+		var objectStoreModel = [{id: 0, name: 'root', type: 'dir'}];
 		findit.sync(photosdir, {}, function(directory, stat) {
 			if (stat.isDirectory()) {
 				var tmp = directory.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
@@ -69,14 +27,21 @@ photos.prototype = {
 					if (aDir.indexOf(dir) == -1) {
 						dirNum = aDir.length;
 						aDir.push(dir);
-						objectStoreModel.push({id: dirNum, name: dir, path: directory.replace(photosdir, ''), parent: parent});
+						objectStoreModel.push({id: dirNum, name: dir, type: 'dir', path: directory.replace(photosdir, ''), parent: parent});
 					} else {
 						parent = aDir.indexOf(dir);
 					}
 				});
 			}
+
+			if (stat.isFile()) {
+				var tmp = directory.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
+				f = tmp.pop();
+				d = tmp.pop();
+				objectStoreModel.push({id: fileNum, name: f, type: 'file', path: directory.replace(photosdir, ''), parent: aDir.indexOf(d)});
+			}
 		});
-		self.dirList = objectStoreModel;
+		self.list = objectStoreModel;
 	},
 
 	unzip: function(file, root) {

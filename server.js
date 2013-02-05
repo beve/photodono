@@ -22,8 +22,7 @@ if (!fs.existsSync(configFile)) {
 
 // Get photos list
 var photos = new photosMod();
-photos.populateDirList(config.photosdir);
-photos.populateFileList(config.photosdir);
+photos.getList(config.photosdir);
 initExpress();
 
 function compile(str, path){
@@ -75,7 +74,7 @@ function initExpress() {
   });
 
   app.get('/getList', function(req, res) {
-     res.json({dirList: photos.dirList, fileList: photos.fileList});
+     res.json(photos.list);
   });
 	
 	app.get('/admin', function(req, res) {
@@ -132,7 +131,7 @@ function initExpress() {
 
     var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min', function(err, files) {
         if (!err) {
-          photos.populateDirList(config.photosdir, function(err) {
+          photos.getList(config.photosdir, function(err) {
             if (!err) {
               res.redirect('/admin');
             }
