@@ -22,10 +22,9 @@ if (!fs.existsSync(configFile)) {
 
 // Get photos list
 var photos = new photosMod();
-photos.populateFileList(config.photosdir, function(err) {
-  if (err) throw err;
-  initExpress();
-});
+photos.populateDirList(config.photosdir);
+photos.populateFileList(config.photosdir);
+initExpress();
 
 function compile(str, path){
   return stylus(str).
@@ -76,7 +75,7 @@ function initExpress() {
   });
 
   app.get('/getList', function(req, res) {
-     res.json(photos.list);
+     res.json({dirList: photos.dirList, fileList: photos.fileList});
   });
 	
 	app.get('/admin', function(req, res) {
@@ -98,7 +97,7 @@ function initExpress() {
     photos.del(req.query.path, function(err, result) {
       if (!err) {
         res.json(result);
-      }
+      } else throw err;
     });
   });
 
@@ -133,7 +132,7 @@ function initExpress() {
 
     var thumbs = photos.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min', function(err, files) {
         if (!err) {
-          photos.populateFileList(config.photosdir, function(err) {
+          photos.populateDirList(config.photosdir, function(err) {
             if (!err) {
               res.redirect('/admin');
             }

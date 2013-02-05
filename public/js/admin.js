@@ -7,9 +7,10 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
   var multipleButtons = ['Delete'];
 
   p.getList(function(err) {
+    console.log(p.fileList);
     if (!err) {
       var photosStore = new Memory({
-        data: p.list,
+        data: p.dirList,
         getChildren: function(object){
           return this.query({parent: object.id});
         }
@@ -18,14 +19,11 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
 
       photosStore = new Observable(photosStore);
 
-      var model = new ObjectStoreModel({
+      var treeModel = new ObjectStoreModel({
           store: photosStore,
-
-          query: {id: "/"},
-
+          query: {id: 0},
           mayHaveChildren: function(object){
-            return (object.type == 'dir') ? true : false;
-            //return this.store.getChildren(object).length > 0;
+            return this.store.getChildren(object).length > 0;
           }
         });
 
@@ -39,10 +37,13 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
       });
 
       var tree = new Tree({
-        model: model,
+        model: treeModel,
         dndController: dndSource,
+        openOnClick: true,
+        autoExpand: false,
         onClick: function(item) {
           var mainMenu = registry.byId('mainMenu');
+          console.log(item);
           array.forEach(mainMenu.getChildren(), function(child) {
             child.set('disabled', true);
             if (item.parent && tree.selectedItems.length == 1 && (tree.selectedItems[0].type == 'dir' || (array.indexOf(fileButtons, child.get('action')) != -1))) {
@@ -57,7 +58,11 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
               }
             }
           });
-        }
+        },
+        getIconClass: function(item, opened){
+          console.log(item);
+          return (opened ? "dijitFolderOpened" : "dijitFolderClosed");
+        },
       }, "tree");
       tree.startup();
       //var f = p.getListFromPath(path);
@@ -98,6 +103,10 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
     });
 
     on(registry.byId('mainMenuBtnDeleteConfirm'), 'click', function(evt) {
+      tree.selectedItems.forEach(function(item) {
+        console.log(item.path);
+      });
+      return;
       request.get("/delete", {query: {path: 'pouet/poeut/pouet'}, handleAs:'json'}).then(
         function(res) {
          console.log(res);

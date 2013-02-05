@@ -20,7 +20,8 @@
 		"gm"									:	"latest",
 		"mkdirp"							:	"latest",
 		"zipfile"							: "latest",
-		"rimraf"							: "latest"
+		"rimraf"							: "latest",
+		"findit"							: "latest"
 	},
 	"bin": { 
 		"captain": "server.js" 

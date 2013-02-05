@@ -2,7 +2,8 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang', 'd
 
     return declare(null, {
 
-      list: [],
+      dirList: [],
+      fileList: [],
 
       constructor: function() {
       },
@@ -10,8 +11,9 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang', 'd
       getList: function(callback) {
         var self = this;
         request("/getList", {handleAs:'json'}).then(
-           function(list) {
-             self.list = list;
+           function(res) {
+             self.dirList = res.dirList;
+             self.fileList = res.fileList;
              callback(null);
            },
            function(err) {

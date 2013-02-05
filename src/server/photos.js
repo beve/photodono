@@ -4,35 +4,14 @@ var zipfile = require('zipfile');
 var gm = require('gm');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
+var findit = require('findit')
 
 var photos = module.exports = function photos() {
-	this.list = {};
+	this.dirList = {};
+	this.fileList = {};
 };
 
 photos.prototype = {
-
-	find: function(dir, callback) {
-		var self = this;
-		var result = [];
-		fs.readdir(dir, function(err, fList) {
-			var pending = fList.length;
-			if (!pending) return callback(null, result);
-			fList.sort().forEach(function(file) {
-				file = dir + '/' + file;
-				fs.stat(file, function(err, stat) {
-					if (stat && stat.isDirectory()) {
-						self.find(file, function(err, res) {
-							result = result.concat(res);
-							if (!--pending) callback(null, result);
-						});
-					} else {
-						result.push(file);
-						if (!--pending) callback(null, result);
-					}
-				});
-			});
-		});
-	},
 
 	findSync: function(dir, callback) {
 		var self = this;
@@ -55,12 +34,12 @@ photos.prototype = {
 		});
 	},
 
-	populateFileListOld: function(dir, callback) {
+	populateFileList: function(dir, callback) {
 		var self = this;
 		this.findSync(dir, function(err, result) {
 			if (err) callback(err);
 			result.forEach(function(file, index, array) {
-				var current = self.list;
+				var current = self.fileList;
 				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
 					file.replace(dir, '').split(path.sep).forEach(function(element, index, array) {
 						if (index < array.length-1) {
@@ -73,45 +52,31 @@ photos.prototype = {
 					});
 				}
 			});
-			callback(null);
 		});
 	},
 
-	populateFileList: function(photosdir, callback) {
-		var self = this;
-		var objectStoreModel = [{id: '/', name: 'Root', type: 'dir'}];
+	populateDirList: function(photosdir, callback) {
 		var aDir = ['/'];
-		this.findSync(photosdir, function(err, result) {
-			if (err) callback(err);
-			result.forEach(function(file, index, array) {
-				file = file.replace(photosdir, '');
-				if ((file.indexOf('_min') != -1) && (['.jpg', '.png', '.gif'].indexOf(path.extname(file).toLowerCase()) != -1)) {
-					var photo = path.basename(file);
-					var filepath = path.dirname(file);
-					var tmp = path.dirname(file).split(path.sep);
-					var dirParent = (tmp[tmp.length-2] !== '') ? tmp[tmp.length-2] : '/';
-					var fileParent = (tmp[tmp.length-1] !== '') ? tmp[tmp.length-1] : '/';
-					if (aDir.indexOf(filepath) == -1) {
-						tmp.forEach(function(d, i) {
-							if (i == 1) {
-								if (aDir.indexOf(d) == -1) {
-									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath, parent: '/'});
-									aDir.push(d);
-								}
-							} else if (i > 1) {
-								if (aDir.indexOf(d) == -1) {
-									objectStoreModel.push({id: d, name: d, type: 'dir', path: filepath.replace(path.sep+d, ''), parent: tmp[i-1]});
-									aDir.push(d);
-								}
-							}
-						});
+		var dirNum = 0;
+		var finder = findit.find(photosdir);
+		var self = this;
+		var objectStoreModel = [{id: 0, name: 'root'}];
+		findit.sync(photosdir, {}, function(directory, stat) {
+			if (stat.isDirectory()) {
+				var tmp = directory.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
+				var parent = 0;
+				tmp.forEach(function(dir, idx) {
+					if (aDir.indexOf(dir) == -1) {
+						dirNum = aDir.length;
+						aDir.push(dir);
+						objectStoreModel.push({id: dirNum, name: dir, path: directory.replace(photosdir, ''), parent: parent});
+					} else {
+						parent = aDir.indexOf(dir);
 					}
-					objectStoreModel.push({id: index, name: photo.replace('_min', ''), type: 'file', path: filepath+path.sep+photo, parent: fileParent});
-				}
-			});
-			self.list = objectStoreModel;
-			callback(null);
+				});
+			}
 		});
+		self.dirList = objectStoreModel;
 	},
 
 	unzip: function(file, root) {
@@ -161,9 +126,10 @@ photos.prototype = {
 	  if (!callback) return new Error("No callback passed to del()");
 		// Hard coded to avoid bio hazard
 		if (path.indexOf('Photos') == -1) {
-			return new Error("No Photos/ in path, abording delete");
+			callback(new Error("No Photos/ in path, abording delete"));
 		} else {
-			rimraf(path, callback);
+			//rimraf(path, callback;
+			console.log('DELETE '+path);
 		}
 	}
 
