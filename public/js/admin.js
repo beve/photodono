@@ -11,7 +11,7 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
       var photosStore = new Memory({
         data: p.list,
         getChildren: function(object){
-          return this.query({parent: object.id, type: 'dir'});
+          return this.query({parent: object.id});
         }
 
       });
@@ -35,28 +35,37 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
         }
       });
 
+      var updateMainMenu = function(item) {
+        var mainMenu = registry.byId('mainMenu');
+        array.forEach(mainMenu.getChildren(), function(child) {
+          child.set('disabled', true);
+          if (item.parent !== undefined && tree.selectedItems.length == 1 && tree.selectedItems[0].type == 'dir') {
+            child.set('disabled', false);
+          } else if (tree.selectedItems.length > 1){
+            stop = false;
+            array.forEach(tree.selectedItems, function(si) {
+              if (si.id === 0) {
+                stop = true;
+              }
+            });
+            if (!stop && array.indexOf(multipleButtons, child.get('action')) != -1) {
+              child.set('disabled', false);
+            }
+          } else {
+            if (array.indexOf(fileButtons, child.get('action')) == -1) {
+              child.set('disabled', false);
+            }
+          }
+        });
+      };
+
       var tree = new Tree({
         model: treeModel,
         dndController: dndSource,
-        openOnClick: true,
+        openOnClick: false,
         autoExpand: false,
         onClick: function(item) {
-          var mainMenu = registry.byId('mainMenu');
-          console.log(item);
-          array.forEach(mainMenu.getChildren(), function(child) {
-            child.set('disabled', true);
-            if (item.parent && tree.selectedItems.length == 1 && (tree.selectedItems[0].type == 'dir' || (array.indexOf(fileButtons, child.get('action')) != -1))) {
-              child.set('disabled', false);
-            } else if (!item.parent) {
-              if (array.indexOf(fileButtons, child.get('action')) == -1) {
-                child.set('disabled', false);
-              }
-            } else if (tree.selectedItems.length > 1){
-              if (array.indexOf(multipleButtons, child.get('action')) != -1) {
-                child.set('disabled', false);
-              }
-            }
-          });
+          updateMainMenu(item);
         },
         getIconClass: function(item, opened){
           return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
@@ -75,7 +84,8 @@ require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/do
     menu.addChild(new MenuItem({
         label: "Delete",
         onClick: function(evt){
-          console.log('click');
+          //console.log(photosStore.query({parent: tree.selectedItems[0].id}));
+
         }
     }));
 

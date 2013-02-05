@@ -39,6 +39,7 @@ photos.prototype = {
 				f = tmp.pop();
 				d = tmp.pop();
 				objectStoreModel.push({id: fileNum, name: f, type: 'file', path: directory.replace(photosdir, ''), parent: aDir.indexOf(d)});
+				fileNum++;
 			}
 		});
 		self.list = objectStoreModel;
