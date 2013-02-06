@@ -2,6 +2,7 @@ extends layout
 
 block append head
   link(rel='stylesheet', href='/css/style.css')
+  link(rel='stylesheet', href='/css/admin.css')
   script
     require(['admin', 'dojo/domReady!'], function(admin) {
       new admin();      
@@ -16,11 +17,12 @@ block append body
       input(type='button', id='mainMenuBtnUpload', action='Upload', data-dojo-type='dijit/form/Button', class='btn', disabled=true, label='Upload') 
     div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'leading', splitter:true", style='width:250px')
       div#tree
-    div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:false")
+    div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:false", id="center")
 
   div(data-dojo-type='dijit/Dialog', id='popupRename', title='Rename')
-    input(data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true', type='text', name='newname')
-    input(data-dojo-type='dijit/form/Button', showLabel: true", type='submit', label='submit', value='Set new name')
+    input(data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true', type='text', name='newname', id='newname')
+    input(type='hidden', name='oldname', id='oldname')
+    input(data-dojo-type='dijit/form/Button', id='mainMenuBtnRenameConfirm', showLabel: true", type='submit', label='submit', value='Set new name')
 
   div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')
     input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteCancel', label='Cancel')

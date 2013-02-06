@@ -77,7 +77,7 @@ function initExpress() {
      res.json(photos.list);
   });
 	
-	app.get('/admin', restrict, function(req, res) {
+	app.get('/admin', function(req, res) {
     res.render('admin', {});
 	});
 
@@ -104,7 +104,7 @@ function initExpress() {
     });
   });
 
-  app.get('/delete', restrict, function (req, res) {
+  app.get('/delete', function (req, res) {
     if (!req.query.path) throw new Error('No Path provided');
     photos.del(req.query.path, function(err, result) {
       if (!err) {
@@ -113,7 +113,16 @@ function initExpress() {
     });
   });
 
-	app.post('/upload', restrict, function(req, res, callback) {
+  app.post('/rename', function (req, res) {
+    if (!req.body.from || !req.body.to) throw new Error('No Path provided');
+    fs.rename(config.photosdir+path.sep+req.body.from, config.photosdir+path.sep+path.dirname(req.body.from)+path.sep+req.body.to, function(err) {
+        var error = err || {};
+       photos.getList(config.photosdir);
+      res.json(true, err);
+    });
+  });
+
+	app.post('/upload', function(req, res, callback) {
     if (!req.files.photoszip) {
       return callback(new Error('no file provided'));
     }

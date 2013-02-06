@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos'], function(declare, array, lang, Deferred, aspect, on, dom, domAttr, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-construct', 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos'], function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
 
   return declare(null, {
 
@@ -16,6 +16,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
     buildTree: function() {
 
+      var self = this;
+
       this.photosStore = new Memory({
         data: this.photos.list,
         getChildren: function(object){
@@ -31,15 +33,16 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
         query: {id: 0},
         mayHaveChildren: function(object){
           return this.store.getChildren(object).length > 0;
-        }
+        },
+        onChange: function (item) {}
       });
 
-      aspect.around(this.photosStore, 'put', function(originalPut) {
+      aspect.around(self.photosStore, 'put', function(originalPut) {
         return function(obj, target) {
           if (target && target.parent) {
             obj.parent = target.parent.id;
           }
-          return originalPut.call(this.photosStore, obj, target);
+          return originalPut.call(self.photosStore, obj, target);
         };
       });
 
@@ -48,9 +51,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
         dndController: dndSource,
         openOnClick: false,
         autoExpand: false,
-        onClick: lang.hitch(this,function(item) {
-          this.updateMainMenu(item);
-        }),
+        onClick: function(item) {
+          self.updateMainMenu(item);
+          self.loadThumbnails(item);
+        },
         getIconClass: function(item, opened){
           return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
         }
@@ -68,7 +72,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
       menu.addChild(new MenuItem({
         label: "Delete",
         onClick: function(evt){
-          console.log(this.photosStore.query({parent: this.tree.selectedItems[0].id}));
         }
       }));
 
@@ -80,8 +83,28 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
       on(registry.byId('mainMenuBtnRename'), 'click', function(evt) {
         var popup = registry.byId('popupRename');
-        popup.getChildren()[0].set('value', self.tree.selectedItems[0].name);
+        dom.byId('oldname').value = self.tree.selectedItems[0].path;
+        dom.byId('newname').value = self.tree.selectedItems[0].name;
         popup.show();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
+
+      on(registry.byId('mainMenuBtnRenameConfirm'), 'click', function(evt) {
+        var oldname = dom.byId('oldname').value;
+        var newname = dom.byId('newname').value;
+        request.post("/rename", {data: {from: oldname, to: newname}, handleAs:'json'}).then(
+          function(res) {
+              var item = self.photosStore.query({'path': oldname});
+              var oldpath = item[0].path.split('/');
+              oldpath.pop();
+              item[0].path = oldpath.join('/')+newname;
+              item[0].name = newname;
+              self.photosStore.put(item[0], {id: item[0].id, overwrite: true});
+              registry.byId('popupRename').hide();
+         },
+         function(err) {
+          console.log(err);
+        });
         topic.publish('mainMenuButtonPressed', this.id);
       });
 
@@ -147,7 +170,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
             child.set('disabled', false);
           }
         } else {
-          if (item.parent != undefined) {
+          if (item.parent !== undefined) {
             if (array.indexOf(fileButtons, child.get('action')) != -1) {
               child.set('disabled', false);
             }
@@ -158,6 +181,23 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
           }
         }
         });
+      },
+
+      loadThumbnails: function(item) {
+        var center = dom.byId('center');
+        var found = 0;
+        domConstruct.empty(dom.byId('center'), 'html', '');
+        var childs = this.photosStore.query({parent: this.tree.selectedItems[0].id});
+        childs.forEach(function(child) {
+          if (child.path.indexOf('_min') != -1) {
+            var div = domConstruct.create('div', {class: "vignette"}, center);
+            var img = domConstruct.create('img', {src: '/Photos/'+child.path}, div);
+            found += 1;
+          }
+        });
+        if (found === 0) {
+          domConstruct.create('div', {innerHTML: 'No image in this directory'}, center);
+        }
       }
   });
 
