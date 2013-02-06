@@ -1,142 +1,160 @@
-require(['dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json',
-        'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos', 'dojo/domReady!'], function(array, Deferred, aspect, on, dom, domAttr, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos'], function(declare, array, Deferred, aspect, on, dom, domAttr, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
 
-  var p = new photos();
+  return declare(null, {
 
-  var fileButtons = ['Rename', 'Delete'];
-  var multipleButtons = ['Delete'];
+    constructor: function() {
 
-  p.getList(function(err) {
-    if (!err) {
-      var photosStore = new Memory({
-        data: p.list,
+      this.photos = new photos();
+      var self = this;
+      this.photos.getList(function(err) {
+        if (!err) {
+          self.buildTree();
+          self.buildMenu();
+          self.bindEvents();
+        }
+      });
+    },
+
+    buildTree: function() {
+
+      this.photosStore = new Memory({
+        data: this.photos.list,
         getChildren: function(object){
           return this.query({parent: object.id});
         }
 
       });
 
-      photosStore = new Observable(photosStore);
+      this.photosStore = new Observable(this.photosStore);
 
       var treeModel = new ObjectStoreModel({
-          store: photosStore,
-          query: {id: 0},
-          mayHaveChildren: function(object){
-            return this.store.getChildren(object).length > 0;
-          }
-        });
-
-      aspect.around(photosStore, 'put', function(originalPut){
-        return function(obj, target){
-          if (target && target.parent){
-            obj.parent = target.parent.id;
-          }
-          return originalPut.call(photosStore, obj, target);
+        store: this.photosStore,
+        query: {id: 0},
+        mayHaveChildren: function(object){
+          return this.store.getChildren(object).length > 0;
         }
       });
 
-      var updateMainMenu = function(item) {
-        var mainMenu = registry.byId('mainMenu');
-        array.forEach(mainMenu.getChildren(), function(child) {
-          child.set('disabled', true);
-          if (item.parent !== undefined && tree.selectedItems.length == 1 && tree.selectedItems[0].type == 'dir') {
-            child.set('disabled', false);
-          } else if (tree.selectedItems.length > 1){
-            stop = false;
-            array.forEach(tree.selectedItems, function(si) {
-              if (si.id === 0) {
-                stop = true;
-              }
-            });
-            if (!stop && array.indexOf(multipleButtons, child.get('action')) != -1) {
-              child.set('disabled', false);
-            }
-          } else {
-            if (array.indexOf(fileButtons, child.get('action')) == -1) {
-              child.set('disabled', false);
-            }
+      aspect.around(this.photosStore, 'put', function(originalPut) {
+        return function(obj, target) {
+          if (target && target.parent) {
+            obj.parent = target.parent.id;
           }
-        });
-      };
+          return originalPut.call(this.photosStore, obj, target);
+        };
+      });
 
-      var tree = new Tree({
+      var self = this;
+      this.tree = new Tree({
         model: treeModel,
         dndController: dndSource,
         openOnClick: false,
         autoExpand: false,
         onClick: function(item) {
-          updateMainMenu(item);
+          self.updateMainMenu(item);
         },
         getIconClass: function(item, opened){
           return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
-        },
+        }
       }, "tree");
-      tree.startup();
-      //var f = p.getListFromPath(path);
-      //grid.adopt(f);
-      //console.log(p.list);
-    }
+      this.tree.startup();
+    },
 
-    var menu = new Menu({
+    buildMenu: function() {
+
+      var menu = new Menu({
         targetNodeIds: ["tree"],
         selector: "span"
-    });
-    menu.addChild(new MenuItem({
+      });
+
+      menu.addChild(new MenuItem({
         label: "Delete",
         onClick: function(evt){
-          //console.log(photosStore.query({parent: tree.selectedItems[0].id}));
-
+          console.log(this.photosStore.query({parent: this.tree.selectedItems[0].id}));
         }
-    }));
+      }));
 
-    on(registry.byId('mainMenuBtnRename'), 'click', function(evt) {
-      //var input = dijit.byNode(query('input[type=text]', 'popupRename'));
-      var popup = registry.byId('popupRename');
-      popup.getChildren()[0].set('value', tree.selectedItems[0].name);
-      popup.show();
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+    },
 
-    on(registry.byId('mainMenuBtnDelete'), 'click', function(evt) {
-      registry.byId('popupDelete').show();
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+    bindEvents: function() {
 
-    on(registry.byId('mainMenuBtnDeleteCancel'), 'click', function(evt) {
-      registry.byId('popupDelete').hide();
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+      var self = this;
 
-    on(registry.byId('mainMenuBtnDeleteConfirm'), 'click', function(evt) {
-      tree.selectedItems.forEach(function(item) {
-        console.log(item.path);
+      on(registry.byId('mainMenuBtnRename'), 'click', function(evt) {
+        var popup = registry.byId('popupRename');
+        popup.getChildren()[0].set('value', self.tree.selectedItems[0].name);
+        popup.show();
+        topic.publish('mainMenuButtonPressed', this.id);
       });
-      return;
-      request.get("/delete", {query: {path: 'pouet/poeut/pouet'}, handleAs:'json'}).then(
-        function(res) {
-         console.log(res);
-        },
-        function(err) {
+
+      on(registry.byId('mainMenuBtnDelete'), 'click', function(evt) {
+        registry.byId('popupDelete').show();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
+
+      on(registry.byId('mainMenuBtnDeleteCancel'), 'click', function(evt) {
+        registry.byId('popupDelete').hide();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
+
+      on(registry.byId('mainMenuBtnDeleteConfirm'), 'click', function(evt) {
+        self.tree.selectedItems.forEach(function(item) {
+          console.log(item.path);
+        });
+        return;
+        request.get("/delete", {query: {path: 'pouet/poeut/pouet'}, handleAs:'json'}).then(
+          function(res) {
+           console.log(res);
+         },
+         function(err) {
           console.log(err);
         });
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
 
-    on(registry.byId('mainMenuBtnNewDirectory'), 'click', function(evt) {
-      photosStore.empty();
-      registry.byId('popupNewDirectory').show();
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+      on(registry.byId('mainMenuBtnNewDirectory'), 'click', function(evt) {
+        registry.byId('popupNewDirectory').show();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
 
-    on(registry.byId('mainMenuBtnUpload'), 'click', function(evt) {
-      registry.byId('popupUpload').show();
-      topic.publish('mainMenuButtonPressed', this.id);
-    });
+      on(registry.byId('mainMenuBtnUpload'), 'click', function(evt) {
+        registry.byId('popupUpload').show();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
 
-    topic.subscribe('mainMenuButtonPressed', function(text) {
-      console.log(text);
-    });
+      topic.subscribe('mainMenuButtonPressed', function(text) {
+        console.log(text);
+      });
 
+    },
+
+    updateMainMenu: function(item) {
+      var fileButtons = ['Rename', 'Delete'];
+      var multipleButtons = ['Delete'];
+      var mainMenu = registry.byId('mainMenu');
+      var self = this;
+
+      array.forEach(mainMenu.getChildren(), function(child) {
+        child.set('disabled', true);
+        if (item.parent !== undefined && self.tree.selectedItems.length == 1 && self.tree.selectedItems[0].type == 'dir') {
+          child.set('disabled', false);
+        } else if (self.tree.selectedItems.length > 1){
+          stop = false;
+          array.forEach(self.tree.selectedItems, function(si) {
+            if (si.id === 0) {
+              stop = true;
+            }
+          });
+          if (!stop && array.indexOf(multipleButtons, child.get('action')) != -1) {
+            child.set('disabled', false);
+          }
+        } else {
+          if (array.indexOf(fileButtons, child.get('action')) == -1) {
+            child.set('disabled', false);
+          }
+        }
+        });
+      }
   });
 
 });

@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang', 'dijit/registry'], function(declare, request, JSON, lang, Evented) {
+define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang'], function(declare, request, JSON, lang) {
 
     return declare(null, {
 
