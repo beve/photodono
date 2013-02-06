@@ -1,18 +1,17 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos'], function(declare, array, Deferred, aspect, on, dom, domAttr, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/Dialog', 'dijit/Menu', 'dijit/MenuItem', 'dijit/MenuBar', 'dijit/MenuBarItem', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photos'], function(declare, array, lang, Deferred, aspect, on, dom, domAttr, query, request, parser, Memory, Observable, topic, JSON, registry, BoerderContainer, ContentPane, TextBox, Button, Dialog, Menu, MenuItem, MenuBar, MenuBarITem, Tree, ObjectStoreModel, dndSource, photos) {
 
   return declare(null, {
 
     constructor: function() {
 
       this.photos = new photos();
-      var self = this;
-      this.photos.getList(function(err) {
+      this.photos.getList(lang.hitch(this, function(err) {
         if (!err) {
-          self.buildTree();
-          self.buildMenu();
-          self.bindEvents();
+          this.buildTree();
+          this.buildMenu();
+          this.bindEvents();
         }
-      });
+      }));
     },
 
     buildTree: function() {
@@ -44,15 +43,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/Deferred', 'dojo/aspect'
         };
       });
 
-      var self = this;
       this.tree = new Tree({
         model: treeModel,
         dndController: dndSource,
         openOnClick: false,
         autoExpand: false,
-        onClick: function(item) {
-          self.updateMainMenu(item);
-        },
+        onClick: lang.hitch(this,function(item) {
+          this.updateMainMenu(item);
+        }),
         getIconClass: function(item, opened){
           return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
         }
@@ -149,7 +147,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/Deferred', 'dojo/aspect'
             child.set('disabled', false);
           }
         } else {
-          if (array.indexOf(fileButtons, child.get('action')) == -1) {
+          if (array.indexOf(fileButtons, child.get('action')) != -1) {
             child.set('disabled', false);
           }
         }
