@@ -147,8 +147,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
             child.set('disabled', false);
           }
         } else {
-          if (array.indexOf(fileButtons, child.get('action')) != -1) {
-            child.set('disabled', false);
+          if (item.parent != undefined) {
+            if (array.indexOf(fileButtons, child.get('action')) != -1) {
+              child.set('disabled', false);
+            }
+          } else {
+            if (array.indexOf(fileButtons, child.get('action')) == -1) {
+              child.set('disabled', false);
+            }
           }
         }
         });
