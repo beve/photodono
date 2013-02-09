@@ -110,6 +110,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
       on(registry.byId('mainMenuBtnDelete'), 'click', function(evt) {
         registry.byId('popupDelete').show();
+        self.tree.selectedItems.forEach(function(item) {
+          domConstruct.empty('filestodelete');
+          domConstruct.create('div', {innerHTML: ' - '+item.name}, 'filestodelete');
+        });
         topic.publish('mainMenuButtonPressed', this.id);
       });
 
@@ -119,11 +123,11 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
       });
 
       on(registry.byId('mainMenuBtnDeleteConfirm'), 'click', function(evt) {
+        var files = [];
         self.tree.selectedItems.forEach(function(item) {
-          console.log(item.path);
+          files.push(item.path);
         });
-        return;
-        request.get("/delete", {query: {path: 'pouet/poeut/pouet'}, handleAs:'json'}).then(
+        request.post("/delete", {data: {files: files}, handleAs:'json'}).then(
           function(res) {
            console.log(res);
          },
@@ -135,6 +139,20 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
       on(registry.byId('mainMenuBtnNewDirectory'), 'click', function(evt) {
         registry.byId('popupNewDirectory').show();
+        topic.publish('mainMenuButtonPressed', this.id);
+      });
+
+      on(registry.byId('mainMenuBtnNewDirectoryConfirm'), 'click', function(evt) {
+        var newdirname = dom.byId('newdirname').value;
+        if (!newdirname) return false;
+        var dir = (self.tree.selectedItems[0].path) ? self.tree.selectedItems[0].path+'/': '/';
+        request.post("/newdirectory", {data: {dir: dir+newdirname}, handleAs:'json'}).then(
+          function(res) {
+            console.log(res);
+          },
+          function(err) {
+            console.log(err);
+          });
         topic.publish('mainMenuButtonPressed', this.id);
       });
 

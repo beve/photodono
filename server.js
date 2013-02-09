@@ -4,6 +4,7 @@ var express = require('express');
 var photosMod = require('./src/server/photos');
 var app = express();
 var path = require('path');
+var util = require('util');
 
 // Config
 var configFile = 'config/config.json';
@@ -104,18 +105,29 @@ function initExpress() {
     });
   });
 
-  app.get('/delete', function (req, res) {
-    if (!req.query.path) throw new Error('No Path provided');
-    photos.del(req.query.path, function(err, result) {
-      if (!err) {
-        res.json(result);
-      } else throw err;
+  app.post('/delete', function (req, res) {
+    if (!req.body.files) throw new Error('No files provided');
+    files = (!util.isArray(req.body.files)) ? [req.body.files] : req.body.files;
+    files.forEach(function(file) {
+      photos.del(path.normalize(config.photosdir+path.sep+file), function(err) {
+         photos.getList(config.photosdir);
+         res.json(true, err);
+      });
     });
   });
 
   app.post('/rename', function (req, res) {
     if (!req.body.from || !req.body.to) throw new Error('No Path provided');
-    fs.rename(config.photosdir+path.sep+req.body.from, config.photosdir+path.sep+path.dirname(req.body.from)+path.sep+req.body.to, function(err) {
+    fs.rename(path.normalize(config.photosdir+path.sep+req.body.from), path.normalize(config.photosdir+path.sep+path.dirname(req.body.from)+path.sep+req.body.to), function(err) {
+        var error = err || {};
+       photos.getList(config.photosdir);
+      res.json(true, err);
+    });
+  });
+
+  app.post('/newdirectory', function (req, res) {
+    if (!req.body.dir) throw new Error('No directory name provided');
+    fs.mkdir(config.photosdir+path.sep+req.body.dir, function(err) {
         var error = err || {};
        photos.getList(config.photosdir);
       res.json(true, err);

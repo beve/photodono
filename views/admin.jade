@@ -20,17 +20,19 @@ block append body
     div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:false", id="center")
 
   div(data-dojo-type='dijit/Dialog', id='popupRename', title='Rename')
-    input(data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true', type='text', name='newname', id='newname')
+    input(data-dojo-type='dijit/form/TextBox', id='newname', data-dojo-props='trim:true', type='text', name='newname')
     input(type='hidden', name='oldname', id='oldname')
-    input(data-dojo-type='dijit/form/Button', id='mainMenuBtnRenameConfirm', showLabel: true", type='submit', label='submit', value='Set new name')
+    input(data-dojo-type='dijit/form/Button', id='mainMenuBtnRenameConfirm', showLabel: true", type='button', label='submit', value='Set new name')
 
   div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')
+    div Are you sure you want to delete theses files ?
+    div(id="filestodelete")
     input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteCancel', label='Cancel')
     input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteConfirm', label='Delete')
 
   div(data-dojo-type='dijit/Dialog', id='popupNewDirectory', title='Create a new directory')
-    input(data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true', type='text', name='newdirname')
-    input(data-dojo-type='dijit/form/Button', showLabel: true", type='submit', label='submit', value='Create the directory')
+    input(data-dojo-type='dijit/form/TextBox', id='newdirname', data-dojo-props='trim:true', type='text', name='newdirname')
+    input(data-dojo-type='dijit/form/Button', id='mainMenuBtnNewDirectoryConfirm', showLabel: true, type='button', label='submit', value='Create the directory')
 
   div(data-dojo-type='dijit/Dialog', id='popupUpload', title='Upload')
     form(method='post', action='/upload', enctype='multipart/form-data')
