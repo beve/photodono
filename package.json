@@ -1,37 +1,33 @@
 {
-	"name"           : "captain",
-	"description"    : "Captain on nodejs",
-	"homepage"       : "http://www.croll.fr",
-	"keywords"       : ["captain", "croll"],
-	"author"         : "CROLL Dev Team",
-	"contributors"   : [
-		{ 
-			"name": "Christophe Beveraggi",
-			"name": "Nicolas Dimitrijevic" 
-		}
-	],
-	"dependencies" : {
-		"express"             : "latest",
-		"jade"                : "latest",
-		"nib "                : "latest",
-		"chai"								:	"latest",
-		"nodemailer"					:	"latest",
-		"stylus"							:	"latest",
-		"gm"									:	"latest",
-		"mkdirp"							:	"latest",
-		"zipfile"							: "latest",
-		"rimraf"							: "latest",
-		"findit"							: "latest"
-	},
-	"bin": { 
-		"captain": "server.js" 
-	},
-	"devDependencies": {
-		"jshint"  : "*"
-	},
-	"engines" : { 
-		"node"  : ">=0.8.0",
-		"npm"   : ">=1.0"
-	},
-	"version"        : "1.0.0"
+  "name": "captain",
+  "description": "Photo website with nodejs",
+  "homepage": "http://beve.org",
+  "keywords": [
+    "captain",
+    "croll"
+  ],
+  "author": "Christophe Beveraggi",
+  "dependencies": {
+    "express": "latest",
+    "jade": "latest",
+    "nib ": "latest",
+    "nodemailer": "latest",
+    "gm": "latest",
+    "mkdirp": "latest",
+    "adm-zip": "latest",
+    "rimraf": "latest",
+    "findit": "latest"
+  },
+  "bin": {
+    "captain": "server.js"
+  },
+  "devDependencies": {
+    "jshint": "*",
+    "grunt": "~0.4.1"
+  },
+  "engines": {
+    "node": ">=0.9.0",
+    "npm": ">=1.0"
+  },
+  "version": "1.0.0"
 }

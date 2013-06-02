@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var zipfile = require('zipfile');
+var AdmZip = require('adm-zip');
 var gm = require('gm');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
@@ -48,8 +48,12 @@ photos.prototype = {
 	unzip: function(file, root) {
 		var files = [];
 		root = path.normalize(root);
-		var zip = new zipfile.ZipFile(file);
-		for(i=0; i< zip.count; i++) {
+		var zip = new AdmZip(file);
+		var zipEntries = zip.getEntries();
+		zipEntries.forEach(function(zipEntry) {
+			 console.log(zipEntry.toString());
+		});
+		/*
 			var dir = root+path.sep+path.dirname(zip.names[i]);
 			if (zip.names[i].split(path.sep)[0] != '__MACOSX') {
 				if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
@@ -60,7 +64,7 @@ photos.prototype = {
 					fs.writeFileSync(root+path.sep+zip.names[i], zip.readFileSync(zip.names[i]));
 				}
 			}
-		}
+		*/
 		return files;
 	},
 
