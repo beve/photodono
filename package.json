@@ -9,7 +9,9 @@
 	"dependencies": {
 		"express": "latest",
 		"jade": "latest",
+		"q": "latest",
 		"redis ": "latest",
+		"hiredis ": "latest",
 		"nodemailer": "latest",
 		"gm": "latest",
 		"mkdirp": "latest",

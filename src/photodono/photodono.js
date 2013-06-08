@@ -7,11 +7,11 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang'], f
       constructor: function() {
       },
 
-      getList: function(callback) {
+      getCategories: function(callback) {
         var self = this;
-        request("/getList", {handleAs:'json'}).then(
-           function(list) {
-             self.list = list;
+        request("/categories", {handleAs:'json'}).then(
+           function(categories) {
+             self.categories = categories;
              callback(null);
            },
            function(err) {

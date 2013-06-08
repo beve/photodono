@@ -6,14 +6,64 @@ var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var findit = require('findit');
 var crypto = require('crypto');
+var redis = require('redis'),
+      client = redis.createClient();
 
-var photodono = module.exports = function photodono() {
-	this.list = {};
+client.on("error", function (err) {
+	console.log("Error " + err);
+});
+
+ var photodono = module.exports = function photodono() {
+	this.categories = [];
 };
 
 photodono.prototype = {
 
-	getList: function(photosdir, callback) {
+	createCategory: function(fields, cb) {
+		client.zadd('categories', fields.pos, 'category:'+fields.name, function(err, msg) {
+			if (err) return cb(err);
+			client.hmset('category:'+fields.name, 'name', fields.name, 'type', fields.type, 'parent', fields.parent, 'path', fields.path, 'desc', fields.desc, 'active', fields.active, 'id', fields.id, function(err, msg) {
+				return cb(err, msg);
+			});
+		});
+	},
+
+	getCategory: function(name, cb) {
+		client.hgetall('category:'+name, function(err, res) {
+			cb(res);
+		});
+	},
+
+	updateCategory: function(fields) {
+		console.log(fields);
+	},
+
+	deleteCategory: function(fields) {
+		console.log(fields);
+	},
+
+	getCategories: function(cb) {
+		var self = this;
+		client.zrange('categories', 0, -1, function(err, replies) {
+			if (replies.length == 0) {
+				if (cb)
+					cb(err);
+				return;
+			}
+			replies.forEach(function(reply, num) {
+				client.hgetall(reply, function(err, hash) {
+					if (hash) {
+						self.categories.push(hash);
+					}
+					if (cb && replies.length == num+1) {
+						cb(err);
+					}
+				});
+			})
+		});
+	},
+
+	getList: function(photosdir, listFiles, callback) {
 		var aDir = ['/'];
 		var dirNum = 0;
 		var fileNum = 1000;
@@ -34,8 +84,7 @@ photodono.prototype = {
 					}
 				});
 			}
-
-			if (stat.isFile()) {
+			if (listFiles && stat.isFile()) {
 				var tmp = found.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
 				f = tmp.pop();
 				d = tmp.pop();
@@ -44,7 +93,6 @@ photodono.prototype = {
 			}
 		});
 		self.list = objectStoreModel;
-		console.log(self.list);
 	},
 
 	unzip: function(file, root) {
