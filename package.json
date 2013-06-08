@@ -1,33 +1,37 @@
 {
-  "name": "captain",
-  "description": "Photo website with nodejs",
-  "homepage": "http://beve.org",
-  "keywords": [
-    "captain",
-    "croll"
-  ],
-  "author": "Christophe Beveraggi",
-  "dependencies": {
-    "express": "latest",
-    "jade": "latest",
-    "nib ": "latest",
-    "nodemailer": "latest",
-    "gm": "latest",
-    "mkdirp": "latest",
-    "adm-zip": "latest",
-    "rimraf": "latest",
-    "findit": "latest"
-  },
-  "bin": {
-    "captain": "server.js"
-  },
-  "devDependencies": {
-    "jshint": "*",
-    "grunt": "~0.4.1"
-  },
-  "engines": {
-    "node": ">=0.9.0",
-    "npm": ">=1.0"
-  },
-  "version": "1.0.0"
+	"name": "photodono",
+	"description": "Photo website with nodejs",
+	"homepage": "http://beve.org",
+	"keywords": [
+		"photo"
+	],
+	"author": "Christophe Beveraggi",
+	"dependencies": {
+		"express": "latest",
+		"jade": "latest",
+		"redis ": "latest",
+		"nodemailer": "latest",
+		"gm": "latest",
+		"mkdirp": "latest",
+		"adm-zip": "latest",
+		"rimraf": "latest",
+		"findit": "latest"
+	},
+	"license": "GPL v2",
+	"bin": {
+		"captain": "server.js"
+	},
+	"devDependencies": {
+		"jshint": "*",
+		"grunt": "~0.4.1"
+	},
+	"engines": {
+		"node": ">=0.9.0",
+		"npm": ">=1.0"
+	},
+	"repositories": [{
+		"type": "git",
+		"url": "http://github.com/beve/photodono.git"
+	}],
+	"version": "1.0.0"
 }

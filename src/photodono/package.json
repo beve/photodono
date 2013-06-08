@@ -1,0 +1,16 @@
+{
+	"name": "photodono",
+	"description": "Photo website with nodejs",
+	"homepage": "http://beve.org",
+	"keywords": [
+		"photo"
+	],
+	"author": "Christophe Beveraggi",
+	"license": "GPL v2",
+	"repositories": [{
+		"type": "git",
+		"url": "http://github.com/beve/photodono.git"
+		}],
+	"version": "1.0.0",
+	"dojoBuild": "photodono.profile.js"
+}

@@ -1,7 +1,6 @@
 var fs = require('fs');
-var stylus = require('stylus');
 var express = require('express');
-var photosMod = require('./src/server/photos');
+var photosMod = require('./src/server/photodono');
 var app = express();
 var path = require('path');
 var util = require('util');
@@ -25,12 +24,6 @@ if (!fs.existsSync(configFile)) {
 var photos = new photosMod();
 photos.getList(config.photosdir);
 initExpress();
-
-function compile(str, path){
-  return stylus(str).
-  set("filename", path).
-  use(nib());
-}
 
 // Plug real authentification
 function authenticate(login, passwd, callback) {
@@ -62,12 +55,6 @@ function initExpress() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
     app.use(express.session());
     app.use(app.router);
-    app.use(stylus.middleware({
-      src: 'views',
-      dest: 'public',
-      compile: compile,
-      compress: true
-    }));
   });
 
   app.get('/', function(req, res) {

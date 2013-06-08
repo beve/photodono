@@ -1,6 +1,5 @@
-require(['simplegrid', 'photos', 'dojo/domReady!'], function(simpleGrid, photos) {
-  var p = new photos();
-  var grid = new simpleGrid('viewport', {elementDimensions: {w: 100, h: 100}});
+require(['photodono', 'dojo/domReady!'], function(photodono) {
+  var p = new photodono();
   var path = '';
 
   p.getList(function(err) {

@@ -3,9 +3,9 @@ head
   block head
     meta(charset='utf-8')
     link(rel='shortcut icon', href='/favicon.ico', type='image/x-icon')
-    script
-      var dojoConfig = {async: true, parseOnLoad:true, packages:[{name: 'dijit', location: '/ext/dijit'}, {name: 'photos', location: '/js', main: 'photos'}, {name: 'admin', location: '/js', main: 'admin'}, {name: 'simplegrid', location: '/js', main: 'simplegrid'}], tlmSiblingOfDojo: false, isDebug: true};
-    script(src='/ext/dojo/dojo.js')
+    script.
+      var dojoConfig = {async: true, parseOnLoad:true, packages:[{name: 'dijit', location: '/js/dijit'}, {name: 'photodono', location: '/js/photodono', main: 'photodono'}, {name: 'admin', location: '/js/photodono', main: 'admin'}], tlmSiblingOfDojo: false, isDebug: true};
+    script(src='/js/dojo/dojo.js')
 
 body(class='claro')
   block body

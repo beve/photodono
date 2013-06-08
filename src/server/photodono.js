@@ -4,13 +4,14 @@ var AdmZip = require('adm-zip');
 var gm = require('gm');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
-var findit = require('findit')
+var findit = require('findit');
+var crypto = require('crypto');
 
-var photos = module.exports = function photos() {
+var photodono = module.exports = function photodono() {
 	this.list = {};
 };
 
-photos.prototype = {
+photodono.prototype = {
 
 	getList: function(photosdir, callback) {
 		var aDir = ['/'];
@@ -19,15 +20,15 @@ photos.prototype = {
 		var finder = findit.find(photosdir);
 		var self = this;
 		var objectStoreModel = [{id: 0, name: 'root', type: 'dir'}];
-		findit.sync(photosdir, {}, function(directory, stat) {
+		findit.sync(photosdir, {}, function(found, stat) {
 			if (stat.isDirectory()) {
-				var tmp = directory.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
+				var tmp = found.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
 				var parent = 0;
 				tmp.forEach(function(dir, idx) {
 					if (aDir.indexOf(dir) == -1) {
 						dirNum = aDir.length;
 						aDir.push(dir);
-						objectStoreModel.push({id: dirNum, name: dir, type: 'dir', path: directory.replace(photosdir, ''), parent: parent});
+						objectStoreModel.push({id: dirNum, name: dir, type: 'dir', path: found.replace(photosdir, ''), parent: parent});
 					} else {
 						parent = aDir.indexOf(dir);
 					}
@@ -35,14 +36,15 @@ photos.prototype = {
 			}
 
 			if (stat.isFile()) {
-				var tmp = directory.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
+				var tmp = found.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
 				f = tmp.pop();
 				d = tmp.pop();
-				objectStoreModel.push({id: fileNum, name: f, type: 'file', path: directory.replace(photosdir, ''), parent: aDir.indexOf(d)});
+				objectStoreModel.push({id: fileNum, name: f, type: 'file', path: found.replace(photosdir, ''), parent: aDir.indexOf(d), md5: crypto.createHash('md5').update(fs.readFileSync(found, 'binary')).digest('hex')});
 				fileNum++;
 			}
 		});
 		self.list = objectStoreModel;
+		console.log(self.list);
 	},
 
 	unzip: function(file, root) {
