@@ -1,8 +1,11 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-construct', 
-			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dijit/registry', 
-			 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/ToggleButton', 'dijit/Toolbar', 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'photodono'], 
-			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, 
-				  registry, BorderContainer, ContentPane, TextBox, Button, Dialog, ToogleButton, Toolbar, ToolbarSeparator , Tree, ObjectStoreModel, dndSource, photodono) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/dom-construct', 
+			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/fx/Toggler',
+			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/ToggleButton', 'dijit/Toolbar', 
+			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor',
+			 'photodono', 'dojox/form/Uploader', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen',
+			 ], 
+			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, Toggler,
+				  registry, BorderContainer, ContentPane, TextBox, Button, Dialog, ToogleButton, Toolbar, ToolbarSeparator , Tree, ObjectStoreModel, dndSource, Editor, photodono, Uploader) {
 
   return declare(null, {
 
@@ -118,10 +121,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 	},
 
 	editCategory: function(item) {
-	  var mainContent = registry.byId('mainContent');
+	 	if (!registry.byId('thumbPane')) {
+	 		new ContentPane({region: 'bottom', splitter: true, id: 'thumbPane', style: 'height:150px'}).placeAt('subBorderContainer');
+	 	}
 		request.get('/category/'+item.name, {handleAs:'json'}).then(
 		  function(res) {
-		  	console.log('RES '+res.datas);
+		  	var mainContent = registry.byId('mainContent');
+		  	registry.findWidgets(mainContent.domNode).forEach(function(el) {console.log(';;'+el);el.destroyRecursive();});
+		 	mainContent.domNode.innerHTML = res.content;
+		 	parser.parse(mainContent.domNode);
 		 },
 		 function(err) {
 		  console.log(err);

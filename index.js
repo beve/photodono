@@ -159,10 +159,11 @@ function initExpress() {
 	});
 
 	app.post('/upload', function(req, res, callback) {
-		if (!req.files.photoszip) {
+		if (!req.files.uploadedFiles) {
 			return callback(new Error('no file provided'));
 		}
-		var zip = req.files.photoszip;
+		var zip = req.files.uploadedFiles;
+		console.log(req.files.uploadedFiles);
 
 		if (zip.type != 'application/zip') {
 			return callback(new Error('It is not a valid zip file'));
