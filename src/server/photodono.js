@@ -95,50 +95,58 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	unzip: function(file, root) {
-		var files = [];
-		root = path.normalize(root);
+	processZip: function(file, categoryName, destDir, cb) {
+		var self = this;
+		destDir = path.normalize(destDir);
 		var zip = new AdmZip(file);
-		var zipEntries = zip.getEntries();
+		zipEntries = zip.getEntries();
+		i = 0;
 		zipEntries.forEach(function(zipEntry) {
-			 console.log(zipEntry.toString());
-		});
-		/*
-			var dir = root+path.sep+path.dirname(zip.names[i]);
-			if (zip.names[i].split(path.sep)[0] != '__MACOSX') {
-				if(['.jpg', '.png', '.gif'].indexOf(path.extname(zip.names[i]).toLowerCase()) != -1) {
-					if (!fs.existsSync(dir)) {
-						mkdirp.sync(dir, 0755);
+			if (zipEntry.isDirectory == false) {
+				var buffer = zip.readFile(zipEntry);
+				self.processImage(buffer, categoryName, zipEntry.entryName, destDir, function(img) {
+					i++;
+					console.log('Resize OK');
+					if (i == zipEntries.length) {
+						console.log('Unzip and resize ok');
 					}
-					files.push(path.sep+zip.names[i]);
-					fs.writeFileSync(root+path.sep+zip.names[i], zip.readFileSync(zip.names[i]));
-				}
+				});
 			}
-		*/
-		return files;
+		});
 	},
 
-	buildThumbnail: function(fileList, tmpdir, destdir, w, h, s, callback) {
-		var suffix = s || '';
-		var files = [];
-		var done = 0;
-		tmpdir = path.normalize(tmpdir);
-		destdir = path.normalize(destdir);
-		fileList.forEach(function(orig) {
-			original = tmpdir+orig;
-			var dir = destdir+path.dirname(orig);
-			var filename = dir+path.sep+path.basename(orig, path.extname(orig))+suffix+path.extname(orig);
-			if (!fs.existsSync(dir)) {
-				mkdirp.sync(dir, 0755);
+	processImage: function(buffer, categoryName, destDir, cb) {
+		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
+		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
+		var destDir = destDir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];
+		var self = this;
+		// Builld thumb
+		this.buildThumbnail(buffer, destDir, m[4], 200, 200, function(err) {
+			if (err) {
+				console.log(err);
+				cb(err);
+				return;
 			}
-			gm(original).resize(w, h).write(filename, function(err) {
-				if (!err) {
-					files.push(filename);
-					if (fileList.length == files.length && callback) {
-						return callback(null, files);
-					}
+			// Build Fullsize
+			self.buildThumbnail(buffer, destDir, m[4], 800,800, function(err) {
+				if (err) {
+					console.log(err);
+					cb(err);
+					return;
 				}
-			});
+				// Save images infos with Redis
+				console.log('Name :'+categoryName);
+				//client.sadd('category:'+categoryName, md5);
+			})
+		});
+	},
+
+	buildThumbnail: function(buffer, destDir, destFile, w, h, cb) {
+		if (!fs.existsSync(destDir)) {
+			mkdirp.sync(destDir)
+		}
+		gm(buffer).resize(w, h).write(destDir+path.sep+destFile, function(err) {
+				return cb(err);
 		});
 	},
 

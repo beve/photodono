@@ -3,10 +3,10 @@ form(method='post', action='/upload', enctype='multipart/form-data')
 		label(for='name') Name
 		input(type='text', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
 	div
-		label(for='uploadedFiles') Description 
-		div#textarea(data-dojo-type='dijit/Editor', data-dojo-props="extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") pouet
+		label(for='description') Description 
+		div#textarea(name='description', data-dojo-type='dijit/Editor', data-dojo-props="extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") pouet
 	div
 		label(for='uploadedFiles') Photos 
-		input(type='file', name='uploadedFiles', multiple='true', data-dojo-type='dojox/form/Uploader', label='Select some files')
+		input(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Select some files')
 	div
 		input(type='submit', label='Submit', data-dojo-type='dijit/form/Button')

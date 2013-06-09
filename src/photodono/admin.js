@@ -122,7 +122,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
 	editCategory: function(item) {
 	 	if (!registry.byId('thumbPane')) {
-	 		new ContentPane({region: 'bottom', splitter: true, id: 'thumbPane', style: 'height:150px'}).placeAt('subBorderContainer');
+	 		new ContentPane({region: 'bottom', splitter: true, id: 'thumbPane', style: 'height:100px'}).placeAt('subBorderContainer');
 	 	}
 		request.get('/category/'+item.name, {handleAs:'json'}).then(
 		  function(res) {

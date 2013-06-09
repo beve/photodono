@@ -158,34 +158,40 @@ function initExpress() {
 		});
 	});
 
-	app.post('/upload', function(req, res, callback) {
+	app.post('/upload', function(req, res) {
+
+		var acceptedImgTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+		var filesDone = 0;
+
+		if (!req.body.name) {
+			res.json({err: 'No name for this category'});
+		}
+
 		if (!req.files.uploadedFiles) {
-			return callback(new Error('no file provided'));
-		}
-		var zip = req.files.uploadedFiles;
-		console.log(req.files.uploadedFiles);
-
-		if (zip.type != 'application/zip') {
-			return callback(new Error('It is not a valid zip file'));
-		}
-		if (zip.size === 0) {
-			return callback(new Error('File is empty'));
+			res.json({err: 'No file provided'});
 		}
 
-		var files = photodono.unzip(zip.path, __dirname+path.sep+config.tmpdir);
-		fs.unlinkSync(zip.path);
-
-		var thumbs = photodono.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.thumb.w, config.thumb.h, '_min', function(err, files) {
-			if (!err) {
-				photodono.getList(config.photosdir, true, function(err) {
-					if (!err) {
-						res.redirect('/admin');
+		req.files.uploadedFiles.forEach(function(f) {
+			if (f.size === 0) {
+				res.json({err: 'File is empty'});
+			}
+			if (f.type == 'application/zip') {
+				var files = photodono.processZip(f.path, req.body.name, __dirname+path.sep+config.tmpdir, function(err) {
+					filesDone += 1;
+					if (req.files.uploadedFiles.length  == fildesDone) {
+						res.json(photodono.getImages(req.body.name));
+					}
+				});
+			}
+			if (acceptedImgTypes.indexOf(f.type) != -1) {
+				photodono.processImage(f.path, req.body.name, __dirname+path.sep+config.tmpdir, function(err) {
+					filesDone += 1;
+					if (req.files.uploadedFiles.length  == fildesDone) {
+						res.json(photodono.getImages(req.body.name));
 					}
 				});
 			}
 		});
-
-		var images = photodono.buildThumbnail(files, __dirname+path.sep+config.tmpdir, __dirname+path.sep+config.photosdir, config.photo.w, config.photo.h, '');
 
 	});
 
