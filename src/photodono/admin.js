@@ -1,11 +1,11 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/dom-construct', 
 			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/fx/Toggler',
 			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/ToggleButton', 'dijit/Toolbar', 
-			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor',
+			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner',
 			 'photodono', 'dojox/form/Uploader', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen',
 			 ], 
 			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, Toggler,
-				  registry, BorderContainer, ContentPane, TextBox, Button, Dialog, ToogleButton, Toolbar, ToolbarSeparator , Tree, ObjectStoreModel, dndSource, Editor, photodono, Uploader) {
+				  registry, BorderContainer, ContentPane, TextBox, Button, Dialog, ToogleButton, Toolbar, ToolbarSeparator , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader) {
 
   return declare(null, {
 
@@ -59,7 +59,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		autoExpand: false,
 		onClick: function(item) {
 		  //self.updateMainMenu(item);
-		  self.editCategory(item);
+		  self.editCategory(item);		
 		  //self.loadThumbnails(item);
 		},
 		getIconClass: function(item, opened){
@@ -74,8 +74,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 	  var self = this;
 
 	  on(registry.byId('btnNewCategory'), 'click', function(evt) {
-	  	console.log('ici');
-	  	registry.byId('mainContent').src='http://google.fr';
+	  	self.newCategory();
+	  });
+
+	  on(registry.byId('btnSubmitCategory'), 'click', function(evt) {
 	  });
 
 	  return;
@@ -121,19 +123,45 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 	},
 
 	editCategory: function(item) {
-	 	if (!registry.byId('thumbPane')) {
-	 		new ContentPane({region: 'bottom', splitter: true, id: 'thumbPane', style: 'height:100px'}).placeAt('subBorderContainer');
-	 	}
+		var self = this;
+		registry.byId('thumbPane').domNode.style.display = 'block';
+		registry.byId('subBorderContainer').resize();
 		request.get('/category/'+item.name, {handleAs:'json'}).then(
 		  function(res) {
-		  	var mainContent = registry.byId('mainContent');
-		  	registry.findWidgets(mainContent.domNode).forEach(function(el) {console.log(';;'+el);el.destroyRecursive();});
-		 	mainContent.domNode.innerHTML = res.content;
-		 	parser.parse(mainContent.domNode);
+		  	self.updateMainContent(res.content);
+		 	registry.byId('categoryName').set('value', item.name);
 		 },
 		 function(err) {
 		  console.log(err);
 		});
+	},
+
+	newCategory: function(item) {
+		var self = this;
+		registry.byId('thumbPane').domNode.style.display = 'none';
+		registry.byId('subBorderContainer').resize();
+		request.get('/newcategory', {handleAs:'json'}).then(
+		  function(res) {
+		  	self.updateMainContent(res.content);
+		 },
+		 function(err) {
+		  console.log(err);
+		});
+	},
+
+	updateCategory: function() {
+		request.post('/category', {handleAs:'json'}).then(
+		  function(res) {
+		  	self.updateMainContent(res.content);
+		 	registry.byId('categoryName').set('value', item.name);
+		 });
+	},
+
+	updateMainContent: function(html) {
+	  	var mainContent = registry.byId('mainContent');
+	  	registry.findWidgets(mainContent.domNode).forEach(function(el) {el.destroyRecursive();});
+	 	mainContent.domNode.innerHTML = html;
+	 	parser.parse(mainContent.domNode);
 	},
 
 	updateMainMenu: function(item) {

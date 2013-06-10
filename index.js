@@ -90,11 +90,17 @@ function initExpress() {
 	app.get('/category/:name', function(req, res) {
 		if (req.params.name) {
 			photodono.getCategory(req.params.name, function(datas) {
-				res.render('admin/category', {}, function(err, content) {
+				res.render('admin/category', {name: req.params.name}, function(err, content) {
 					res.json({content: content, datas: datas});
 				});
 			});
 		}
+	});
+
+	app.get('/newcategory', function(req, res) {
+		res.render('admin/category', function(err, content) {
+			res.json({content: content});
+		});
 	});
 
 	app.get('/categories', function(req, res) {
@@ -178,16 +184,16 @@ function initExpress() {
 			if (f.type == 'application/zip') {
 				var files = photodono.processZip(f.path, req.body.name, __dirname+path.sep+config.tmpdir, function(err) {
 					filesDone += 1;
-					if (req.files.uploadedFiles.length  == fildesDone) {
-						res.json(photodono.getImages(req.body.name));
+					if (req.files.uploadedFiles.length  == filesDone) {
+						res.json(photodono.getImagesFromCategory(req.body.name));
 					}
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(f.path, req.body.name, __dirname+path.sep+config.tmpdir, function(err) {
+				photodono.processImage(f.path, req.body.name, f.name, __dirname+path.sep+config.tmpdir, function(err) {
 					filesDone += 1;
-					if (req.files.uploadedFiles.length  == fildesDone) {
-						res.json(photodono.getImages(req.body.name));
+					if (req.files.uploadedFiles.length  == filesDone) {
+						res.json(photodono.getImagesFromCategory(req.body.name));
 					}
 				});
 			}

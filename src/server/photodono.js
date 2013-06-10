@@ -63,6 +63,10 @@ photodono.prototype = {
 		});
 	},
 
+	getImagesFromCategory: function($categoryName) {
+		client.smembers($categoryName);
+	},
+
 	getList: function(photosdir, listFiles, callback) {
 		var aDir = ['/'];
 		var dirNum = 0;
@@ -95,7 +99,8 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, categoryName, destDir, cb) {
+	processZip: function(file, categoryName, filename, destDir, cb) {
+		console.log('DEST '+destDir);
 		var self = this;
 		destDir = path.normalize(destDir);
 		var zip = new AdmZip(file);
@@ -115,37 +120,37 @@ photodono.prototype = {
 		});
 	},
 
-	processImage: function(buffer, categoryName, destDir, cb) {
+	processImage: function(buffer, categoryName, filename, destDir, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
 		var destDir = destDir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];
 		var self = this;
 		// Builld thumb
-		this.buildThumbnail(buffer, destDir, m[4], 200, 200, function(err) {
+		this.buildThumbnail(buffer, filename, destDir, m[4], 200, 200, function(err) {
 			if (err) {
 				console.log(err);
 				cb(err);
 				return;
 			}
 			// Build Fullsize
-			self.buildThumbnail(buffer, destDir, m[4], 800,800, function(err) {
+			self.buildThumbnail(buffer, filename, destDir, m[4], 800,800, function(err) {
 				if (err) {
 					console.log(err);
 					cb(err);
 					return;
 				}
 				// Save images infos with Redis
-				console.log('Name :'+categoryName);
-				//client.sadd('category:'+categoryName, md5);
+				client.sadd('category:'+categoryName, md5);
+				client.hset()
 			})
 		});
 	},
 
-	buildThumbnail: function(buffer, destDir, destFile, w, h, cb) {
+	buildThumbnail: function(buffer, filename, destDir, destFile, w, h, cb) {
 		if (!fs.existsSync(destDir)) {
 			mkdirp.sync(destDir)
 		}
-		gm(buffer).resize(w, h).write(destDir+path.sep+destFile, function(err) {
+		gm(buffer, filename).resize(w, h).write(destDir+path.sep+destFile, function(err) {
 				return cb(err);
 		});
 	},

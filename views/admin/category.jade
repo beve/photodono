@@ -1,12 +1,41 @@
-form(method='post', action='/upload', enctype='multipart/form-data')
-	div
-		label(for='name') Name
-		input(type='text', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
-	div
-		label(for='description') Description 
-		div#textarea(name='description', data-dojo-type='dijit/Editor', data-dojo-props="extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") pouet
-	div
-		label(for='uploadedFiles') Photos 
-		input(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Select some files')
-	div
-		input(type='submit', label='Submit', data-dojo-type='dijit/form/Button')
+- if (locals.name) {
+	h1 Modification de la gallerie #{locals.name}
+	submitLabel = 'Modifier la gallerie';
+	action = 'new';
+- } else {
+	h1 Créer une gallerie 
+	name = '';
+	desc = '';
+	submitLabel = 'Créer la gallerie'
+	action = 'edit';
+- }
+form(method='post', action='/upload', enctype='multipart/form-data', id='category')
+	table
+		tr
+			td
+				abel(for='name') Nom
+			td
+				input(type='text', id='categoryName', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
+		tr
+			td
+				label(for='desc') Description 
+			td
+				div(id='desc', height='200px', name='desc', data-dojo-type='dijit/Editor', data-dojo-props="extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") #{desc}
+		tr
+			td		
+				label(for='position') Position 
+			td
+				div(name='position', data-dojo-type='dijit/form/NumberSpinner', data-dojo-props="smallDelta:1, constraints:{min:0,places:0}", style="width:50px")
+		tr
+			- if (action == 'new') {
+			td
+				label(for='uploadedFiles') Ajouter des photos 
+			td
+				input(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Sélectionner les photos')
+			- } else {
+				td
+				td Créez la gallerie pour pouvoir ajouter des photos
+			- }
+		tr
+			td(colspan=2, style="text-align:center")
+				input(id='btnSubmitCategory', action='#{action}', type='submit', label='#{submitLabel}', data-dojo-type='dijit/form/Button')

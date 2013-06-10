@@ -10,22 +10,23 @@ block append head
 		});
 
 block append body
-	div#mainBorderContainer(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="design:'headline', gutters:false, liveSplitters:false", style='width:100%;height:100%')	
+	div#mainBorderContainer(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="design:'headline', gutters:false, liveSplitters:true", style='width:100%;height:100%')	
 		div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'top'")
-			div Administration
-		div#subBorderContainer(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="region: 'center',design:'sidebar', gutters:true, liveSplitters:true", style='width:100%;height:100%')	
+			div#toolbar(data-dojo-type='dijit/Toolbar')
+				div(data-dojo-type='dijit/form/Button', id='btnNewCategory', label='Créer une gallerie', data-dojo-props="iconClass:'dijitEditorIcon dijitEditorIconWikiword'")
+		div(id='subBorderContainer', data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="region: 'center',design:'sidebar', gutters:true, liveSplitters:true", style='width:100%;height:100%')	
 			div(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="region: 'left', splitter: true, design: 'headline'", style='width:250px;height:100%')
 				div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:true")
-					div#toolbar(data-dojo-type='dijit/Toolbar')
-						div(data-dojo-type='dijit/form/Button', id='btnNewCategory', action='NewCategory', label='New category', data-dojo-props="iconClass:'dijitEditorIcon dijitEditorIconWikiword'")
+					div.treeTitle Liste des galleries
 					div#tree
-				div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom',splitter:true", id='helpPane', style="height:200px")
-					div Help here
+				div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom',splitter:true", id='helpPane')
+					div Aide
 
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center'", id='mainContent')
+			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom', splitter:true", id='thumbPane')
 
 	div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')
-		div Are you sure you want to delete theses files ?
+		div Êtes vous sûr de vouloir supprimer ces fichiers ?
 		div(id='filestodelete')
 		input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteCancel', label='Cancel')
 		input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteConfirm', label='Delete')
