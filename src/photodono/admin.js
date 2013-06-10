@@ -36,7 +36,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
 	  var treeModel = new ObjectStoreModel({
 		store: this.photosStore,
-		query: {id: 0},
+		query: {id: 1},
 		mayHaveChildren: function(object){
 		  return this.store.getChildren(object).length > 0;
 		},
@@ -63,7 +63,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		  //self.loadThumbnails(item);
 		},
 		getIconClass: function(item, opened){
-		  return (item.type == 'dir') ? (opened ? 'dijitFolderOpened' : 'dijitFolderClosed') : 'dijitLeaf';
+		  return (opened ? 'dijitFolderOpened' : 'dijitFolderClosed');
 		}
 	  }, "tree");
 	  this.tree.startup();
@@ -123,10 +123,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		var self = this;
 		registry.byId('thumbPane').domNode.style.display = 'block';
 		registry.byId('subBorderContainer').resize();
-		request.get('/category/'+item.name, {handleAs:'json'}).then(
+		request.get('/category/'+item.id, {handleAs:'json'}).then(
 		  function(res) {
 		  	self.updateMainContent(res.content);
-		 	registry.byId('categoryName').set('value', item.name);
 		 },
 		 function(err) {
 		  console.log(err);

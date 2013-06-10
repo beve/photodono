@@ -4,6 +4,7 @@ var photodono = require('./src/server/photodono');
 var app = express();
 var path = require('path');
 var util = require('util');
+var Sequelize = require('sequelize');
 
 // Config
 var configFile = 'config/config.json';
@@ -20,27 +21,10 @@ if (!fs.existsSync(configFile)) {
 	}
 }
 
-// Get photos list
-var photodono = new photodono();
+// Init photodono
+	var photodono = new photodono(config);
+// Init express
 
-// Register root category if not exists
-photodono.getCategories(function(err) {
-	if (err) {
-		console.log('Error retrieving categories');
-		process.exit(1);
-	}
-	if (photodono.categories.length == 0) {
-		photodono.createCategory({id: 0, name: 'root', type: 'dir', parent: null, path: '/', pos: 0, active: 1, desc: ''}, function(err, msg) {
-			if (err) {
-					console.log('Category creation error: '+err);
-					process.exit(1);
-			}
-			photodono.getCategories();
-		});
-	}
-});
-
-//photodono.getList(config.photosdir, false);
 initExpress();
 
 // Plug real authentification
@@ -66,7 +50,7 @@ function initExpress() {
 		app.set('views', 'views');
 		app.set('view engine', 'jade');
 		app.use(express.favicon('public/img/favicon.ico'));
-		app.use(express.bodyParser({uploadDir: __dirname+'/tmp' }));
+		app.use(express.bodyParser({uploadDir: __dirname+config.tmpdir}));
 		app.use(express.methodOverride());
 		app.use(express.cookieParser(config.secret));
 		app.use(express.static('public'));
@@ -87,11 +71,12 @@ function initExpress() {
 		res.render('admin/index', {});
 	});
 
-	app.get('/category/:name', function(req, res) {
-		if (req.params.name) {
-			photodono.getCategory(req.params.name, function(datas) {
-				res.render('admin/category', {name: req.params.name, heading: req.params.heading, desc:req.params.editorContent, position:req.params.position}, function(err, content) {
-					res.json({content: content, datas: datas});
+	app.get('/category/:id', function(req, res) {
+		if (req.params.id) {
+			photodono.getCategory(req.params.id, function(category) {
+				res.render('admin/category', category, function(err, content) {
+					console.log(category);
+					res.json({content: content, photos: category.photos});
 				});
 			});
 		}
@@ -184,7 +169,7 @@ function initExpress() {
 				res.json({err: 'File is empty'});
 			}
 			if (f.type == 'application/zip') {
-				var files = photodono.processZip(f.path, req.body.name, __dirname+path.sep+config.tmpdir, function(err) {
+				var files = photodono.processZip(f.path, req.body.name, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
 						res.json(photodono.getImagesFromCategory(req.body.name));
@@ -192,7 +177,7 @@ function initExpress() {
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(f.path, req.body.name, f.name, __dirname+path.sep+config.tmpdir, function(err) {
+				photodono.processImage(f.path, req.body.name, f.name, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
 						res.json(photodono.getImagesFromCategory(req.body.name));

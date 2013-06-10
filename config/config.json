@@ -7,7 +7,7 @@
 	},
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
-	"photosdir": "public/Photos",
+	"imgdir": "public/Photos",
 	"thumb": {
 		"w" : 200,
 		"h" : 200
@@ -16,5 +16,17 @@
 		"w" : 600,
 		"h" : 600
 	},
-  "pass": "pouet"
+	"database": {
+		"database": "photodono",
+		"protocol": "mysql",
+		"host": "localhost",
+		"port": 3306,
+		"user": "photodono",
+		"password": "photoP4SS",
+		"query": {
+			"pool" : false,
+			"debug" : false
+		}
+	},
+  	"pass": "pouet"
 }

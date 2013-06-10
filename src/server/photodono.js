@@ -6,31 +6,65 @@ var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var findit = require('findit');
 var crypto = require('crypto');
-var redis = require('redis'),
-      client = redis.createClient();
+var Sequelize = require('sequelize');
 
-client.on("error", function (err) {
-	console.log("Error " + err);
-});
-
- var photodono = module.exports = function photodono() {
+ var photodono = module.exports = function photodono(config) {
+ 	this.config = config;
 	this.categories = [];
+	var self = this;
+
+	// Connect to database
+	var sequelize = new Sequelize(config.database.database, config.database.user, config.database.password, {
+		host: config.database.host,
+		port: config.database.port,
+		dialect: config.database.protocol
+	});
+
+	this.Category = sequelize.define('Category', {
+		name: { type: Sequelize.STRING, allowNull: false},
+		heading: Sequelize.TEXT,
+		description: Sequelize.TEXT,
+		position: Sequelize.INTEGER,
+		parent: Sequelize.INTEGER
+	})
+
+	this.Photo = sequelize.define('Photo', {
+		name: { type: Sequelize.STRING, allowNull: false},
+		description: Sequelize.TEXT,
+		hash: { type: Sequelize.STRING(32)},
+		default: Sequelize.BOOLEAN
+	})
+
+	this.Photo.hasMany(this.Category);
+	this.Category.hasMany(this.Photo);
+
+	sequelize.sync().success(function() {
+		console.log('Database sync ok.')
+		// Check if root category exists or create it
+		self.Category.findOrCreate({id: 1, name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
+			if (created) {
+				console.log('Top level category root created.');
+			}
+			// Populate categories
+			self.getCategories(function(categories) {
+				self.categories = categories;
+			});
+		});
+	}).error(function(error) {
+		console.log('Database sync error: '+error);
+	})
 };
+
 
 photodono.prototype = {
 
 	createCategory: function(fields, cb) {
-		client.zadd('categories', fields.pos, 'category:'+fields.name, function(err, msg) {
-			if (err) return cb(err);
-			client.hmset('category:'+fields.name, 'name', fields.name, 'type', fields.type, 'parent', fields.parent, 'path', fields.path, 'desc', fields.desc, 'active', fields.active, 'id', fields.id, function(err, msg) {
-				return cb(err, msg);
-			});
-		});
+
 	},
 
-	getCategory: function(name, cb) {
-		client.hgetall('category:'+name, function(err, res) {
-			cb(res);
+	getCategory: function(id, cb) {
+		this.Category.find({where: {id: id}, attributes: ['id', 'name', 'heading', 'description', 'position']}).success(function(category) {
+			return cb(category.selectedValues);
 		});
 	},
 
@@ -44,22 +78,12 @@ photodono.prototype = {
 
 	getCategories: function(cb) {
 		var self = this;
-		client.zrange('categories', 0, -1, function(err, replies) {
-			if (replies.length == 0) {
-				if (cb)
-					cb(err);
-				return;
-			}
-			replies.forEach(function(reply, num) {
-				client.hgetall(reply, function(err, hash) {
-					if (hash) {
-						self.categories.push(hash);
-					}
-					if (cb && replies.length == num+1) {
-						cb(err);
-					}
-				});
-			})
+		var ret = [];
+		self.Category.findAll({attributes: ['id', 'name', 'heading', 'description', 'position']}).success(function(categories) {
+			categories.forEach(function(cat) {
+				ret.push(cat.selectedValues);
+			});
+			cb(ret);
 		});
 	},
 
@@ -99,17 +123,15 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, categoryName, filename, destDir, cb) {
-		console.log('DEST '+destDir);
+	processZip: function(file, categoryName, filename, cb) {
 		var self = this;
-		destDir = path.normalize(destDir);
 		var zip = new AdmZip(file);
 		zipEntries = zip.getEntries();
 		i = 0;
 		zipEntries.forEach(function(zipEntry) {
 			if (zipEntry.isDirectory == false) {
 				var buffer = zip.readFile(zipEntry);
-				self.processImage(buffer, categoryName, zipEntry.entryName, destDir, function(img) {
+				self.processImage(buffer, categoryName, zipEntry.entryName, function(img) {
 					i++;
 					console.log('Resize OK');
 					if (i == zipEntries.length) {
@@ -120,28 +142,27 @@ photodono.prototype = {
 		});
 	},
 
-	processImage: function(buffer, categoryName, filename, destDir, cb) {
+	processImage: function(buffer, categoryName, filename, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
-		var destDir = destDir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];
+		var destDir = __dirname+'..'+path.sep+'..'+path.sep+path.normalize(this.config.photos.tmpdir)+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];
+		console.log(destDir);
 		var self = this;
 		// Builld thumb
-		this.buildThumbnail(buffer, filename, destDir, m[4], 200, 200, function(err) {
+		this.buildThumbnail(buffer, filename, destDir, m[4], config.thumb.w, config.thumb.h, function(err) {
 			if (err) {
 				console.log(err);
 				cb(err);
 				return;
 			}
 			// Build Fullsize
-			self.buildThumbnail(buffer, filename, destDir, m[4], 800,800, function(err) {
+			self.buildThumbnail(buffer, filename, destDir, m[4], config.photo.w,config.photo.h, function(err) {
 				if (err) {
 					console.log(err);
 					cb(err);
 					return;
 				}
 				// Save images infos with Redis
-				client.sadd('category:'+categoryName, md5);
-				client.hset()
 			})
 		});
 	},

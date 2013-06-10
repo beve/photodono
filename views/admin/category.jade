@@ -24,9 +24,9 @@ form(method='post', action='/upload', enctype='multipart/form-data', id='categor
 				textarea(id='heading', name='heading', row="30", data-dojo-type='dijit/form/SimpleTextarea', data-dojo-props='trim:true') #{locals.heading}
 		tr
 			td
-				label(for='desc') Description 
+				label(for='description') Description 
 			td
-				div(id='desc', name='desc', data-dojo-type='dijit/Editor', height='200px', data-dojo-props="onChange:function(text){dom.byId('editorContent').value = text;}, extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") #{locals.desc}
+				div(id='description', name='description', data-dojo-type='dijit/Editor', height='200px', data-dojo-props="onChange:function(text){dom.byId('editorContent').value = text;}, extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") #{locals.description}
 		tr
 			td		
 				label(for='position') Position 
