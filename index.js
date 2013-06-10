@@ -90,7 +90,7 @@ function initExpress() {
 	app.get('/category/:name', function(req, res) {
 		if (req.params.name) {
 			photodono.getCategory(req.params.name, function(datas) {
-				res.render('admin/category', {name: req.params.name}, function(err, content) {
+				res.render('admin/category', {name: req.params.name, heading: req.params.heading, desc:req.params.editorContent, position:req.params.position}, function(err, content) {
 					res.json({content: content, datas: datas});
 				});
 			});
@@ -98,21 +98,21 @@ function initExpress() {
 	});
 
 	app.get('/newcategory', function(req, res) {
-		res.render('admin/category', function(err, content) {
+		res.render('admin/category', {name: '', heading: '', desc: '', position: 0}, function(err, content) {
 			res.json({content: content});
 		});
 	});
 
+	app.post('/category', function(req, res) {
+		console.log(req.body);
+	});
+
+	app.put('/category', function(req, res) {
+
+	});
+
 	app.get('/categories', function(req, res) {
 		res.json(photodono.categories);
-	});
-
-	app.put('/categories', function(req, res) {
-
-	});
-
-	app.post('/categories', function(req, res) {
-
 	});
 
 	app.get('/login', function(req, res) {
@@ -171,10 +171,12 @@ function initExpress() {
 
 		if (!req.body.name) {
 			res.json({err: 'No name for this category'});
+			return;
 		}
 
 		if (!req.files.uploadedFiles) {
 			res.json({err: 'No file provided'});
+			return;
 		}
 
 		req.files.uploadedFiles.forEach(function(f) {

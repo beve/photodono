@@ -1,41 +1,49 @@
 - if (locals.name) {
 	h1 Modification de la gallerie #{locals.name}
 	submitLabel = 'Modifier la gallerie';
-	action = 'new';
+	- if (typeof(locals.heading == undefined)) locals.heading = '';
+	- if (typeof(locals.position == undefined)) locals.position = 0;
+	action = 'edit';
 - } else {
 	h1 Créer une gallerie 
-	name = '';
-	desc = '';
 	submitLabel = 'Créer la gallerie'
-	action = 'edit';
+	action = 'new';
 - }
 form(method='post', action='/upload', enctype='multipart/form-data', id='category')
+	input(type='hidden', name='editorContent', id='editorContent')
 	table
 		tr
 			td
-				abel(for='name') Nom
+				label(for='name') Nom
 			td
-				input(type='text', id='categoryName', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
+				input(id='categoryName', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
+		tr
+			td
+				label(for='heading') Chapeau
+			td
+				textarea(id='heading', name='heading', row="30", data-dojo-type='dijit/form/SimpleTextarea', data-dojo-props='trim:true') #{locals.heading}
 		tr
 			td
 				label(for='desc') Description 
 			td
-				div(id='desc', height='200px', name='desc', data-dojo-type='dijit/Editor', data-dojo-props="extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") #{desc}
+				div(id='desc', name='desc', data-dojo-type='dijit/Editor', height='200px', data-dojo-props="onChange:function(text){dom.byId('editorContent').value = text;}, extraPlugins:['|', 'foreColor','hiliteColor','|','createLink','fullscreen','|', 'fontSize', 'formatBlock']") #{locals.desc}
 		tr
 			td		
 				label(for='position') Position 
 			td
-				div(name='position', data-dojo-type='dijit/form/NumberSpinner', data-dojo-props="smallDelta:1, constraints:{min:0,places:0}", style="width:50px")
+				div(name='position', data-dojo-type='dijit/form/NumberSpinner', data-dojo-props="smallDelta:1, constraints:{min:0,places:0}", value='#{locals.position}', style="width:50px")
 		tr
-			- if (action == 'new') {
+			- if (action == 'edit') {
 			td
 				label(for='uploadedFiles') Ajouter des photos 
 			td
-				input(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Sélectionner les photos')
+				button(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Sélectionner les photos')
 			- } else {
 				td
 				td Créez la gallerie pour pouvoir ajouter des photos
 			- }
 		tr
 			td(colspan=2, style="text-align:center")
-				input(id='btnSubmitCategory', action='#{action}', type='submit', label='#{submitLabel}', data-dojo-type='dijit/form/Button')
+				button(type='button', id='btnSubmitCategory', action='#{action}', label='#{submitLabel}', data-dojo-type='dijit/form/Button')
+					script(type='dojo/on', data-dojo-event='click').
+						adm.updateCategory('#{action}');

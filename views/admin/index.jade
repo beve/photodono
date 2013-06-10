@@ -5,8 +5,9 @@ block append head
 	link(rel='stylesheet', href='/css/style.css')
 	link(rel='stylesheet', href='/css/admin.css')
 	script.
+		var adm;
 		require(['admin', 'dojo/domReady!'], function(admin) {
-			new admin();
+			adm = new admin();
 		});
 
 block append body
