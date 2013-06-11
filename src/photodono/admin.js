@@ -1,11 +1,11 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/dom-construct', 
 			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/dom-form',
-			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/SimpleTextarea', 'dijit/Toolbar', 
+			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'dijit/form/SimpleTextarea', 'dijit/Toolbar', 
 			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner',
-			 'photodono', 'dojox/form/Uploader',
+			 'photodono', 'dojox/form/Uploader', 
 			 'dojox/widget/Toaster', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen'], 
 			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, dojoForm,
-				  registry, BorderContainer, ContentPane, TextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader, Toaster) {
+				  registry, BorderContainer, Form, ContentPane, TextBox, ValidationTextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader, Toaster) {
 
   return declare(null, {
 
@@ -146,6 +146,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 	},
 
 	updateCategory: function(action) {
+		if (!registry.byId('category').validate()) {
+			return false;
+		}
 		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
 		  function(res) {
 		  	topic.publish("toasterMessage", {

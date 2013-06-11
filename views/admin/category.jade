@@ -7,7 +7,7 @@
 	submitLabel = 'Créer la gallerie'
 	action = 'new';
 - }
-form(method='post', action='/upload', enctype='multipart/form-data', id='category')
+form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='category', enctype='multipart/form-data', id='category')
 	input(type='hidden', name='id', value='#{id}')
 	input(type='hidden', name='description', id='description', value='#{description}')
 	table
@@ -15,7 +15,7 @@ form(method='post', action='/upload', enctype='multipart/form-data', id='categor
 			td
 				label(for='name') Nom
 			td
-				input(id='categoryName', name='name', data-dojo-type='dijit/form/TextBox', data-dojo-props='trim:true,selectOnClick:true', value='#{name}')
+				input(id='categoryName', name='name', data-dojo-type='dijit/form/ValidationTextBox', required=true, data-dojo-props="trim:true,selectOnClick:true", value='#{name}')
 		tr
 			td
 				label(for='heading') Chapeau
