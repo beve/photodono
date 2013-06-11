@@ -1,0 +1,32 @@
+{
+	"server": {
+		"port" : 3000
+	},
+	"log" : {
+		"level": "ALL"
+	},
+	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
+	"tmpdir": "tmp",
+	"photosdir": "public/Photos",
+	"thumb": {
+		"w" : 200,
+		"h" : 200
+	},
+	"photo" : {
+		"w" : 600,
+		"h" : 600
+	},
+	"database": {
+		"datábase": "photodono",
+		"protocol": "postgres",
+		"host": "localhost",
+		"port": "3306",
+		"user": "photodono",
+		"password": "photoP4SS",
+		"query": {
+			"pool" : false,
+			"debug" : false
+		}
+	},
+  	"pass": "pouet"
+}

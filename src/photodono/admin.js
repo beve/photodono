@@ -2,10 +2,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/dom-form',
 			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/SimpleTextarea', 'dijit/Toolbar', 
 			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner',
-			 'photodono', 'dojox/form/Uploader', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen',
-			 ], 
+			 'photodono', 'dojox/form/Uploader',
+			 'dojox/widget/Toaster', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen'], 
 			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, dojoForm,
-				  registry, BorderContainer, ContentPane, TextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader) {
+				  registry, BorderContainer, ContentPane, TextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader, Toaster) {
 
   return declare(null, {
 
@@ -136,7 +136,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		var self = this;
 		registry.byId('thumbPane').domNode.style.display = 'none';
 		registry.byId('subBorderContainer').resize();
-		request.get('/newcategory', {handleAs:'json'}).then(
+		request.get('/category', {handleAs:'json'}).then(
 		  function(res) {
 		  	self.updateMainContent(res.content);
 		 },
@@ -148,7 +148,11 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 	updateCategory: function(action) {
 		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
 		  function(res) {
-		  	console.log('pouet');
+		  	topic.publish("toasterMessage", {
+      				message: (res.err ? res.err : res.msg),
+       			type: (res.err ? 'fatal' : 'message'),
+      				duration: 1000
+    			 });
 		 },
 		 function(err) {
 		  console.log(err);

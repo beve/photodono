@@ -75,25 +75,23 @@ function initExpress() {
 		if (req.params.id) {
 			photodono.getCategory(req.params.id, function(category) {
 				res.render('admin/category', category, function(err, content) {
-					console.log(category);
 					res.json({content: content, photos: category.photos});
 				});
 			});
 		}
 	});
 
-	app.get('/newcategory', function(req, res) {
+	app.get('/category', function(req, res) {
 		res.render('admin/category', {name: '', heading: '', desc: '', position: 0}, function(err, content) {
 			res.json({content: content});
 		});
 	});
 
 	app.post('/category', function(req, res) {
-		console.log(req.body);
-	});
-
-	app.put('/category', function(req, res) {
-
+		photodono.updateCategory(req.body, function(err, msg) {
+			if (!err)
+				res.json({err: err, msg: msg});
+		});
 	});
 
 	app.get('/categories', function(req, res) {
@@ -130,22 +128,6 @@ function initExpress() {
 			photodono.del(path.normalize(config.photosdir+path.sep+file), function(err) {
 				res.json(true, err);
 			});
-		});
-	});
-
-	app.post('/rename', function (req, res) {
-		if (!req.body.from || !req.body.to) throw new Error('No Path provided');
-		fs.rename(path.normalize(config.photosdir+path.sep+req.body.from), path.normalize(config.photosdir+path.sep+path.dirname(req.body.from)+path.sep+req.body.to), function(err) {
-			var error = err || {};
-			res.json(true, err);
-		});
-	});
-
-	app.post('/newdirectory', function (req, res) {
-		if (!req.body.dir) throw new Error('No directory name provided');
-		fs.mkdir(config.photosdir+path.sep+req.body.dir, function(err) {
-			var error = err || {};
-			res.json(true, err);
 		});
 	});
 

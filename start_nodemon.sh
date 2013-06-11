@@ -1,1 +1,1 @@
-nodemon -w . -w ./src/server --debug index.js
+nodemon -w index.js -w ./src/server --debug index.js

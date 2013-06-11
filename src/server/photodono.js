@@ -7,6 +7,7 @@ var rimraf = require('rimraf');
 var findit = require('findit');
 var crypto = require('crypto');
 var Sequelize = require('sequelize');
+var _ = require('underscore');
 
  var photodono = module.exports = function photodono(config) {
  	this.config = config;
@@ -28,27 +29,25 @@ var Sequelize = require('sequelize');
 		parent: Sequelize.INTEGER
 	})
 
-	this.Photo = sequelize.define('Photo', {
+	this.Image = sequelize.define('Image', {
 		name: { type: Sequelize.STRING, allowNull: false},
 		description: Sequelize.TEXT,
 		hash: { type: Sequelize.STRING(32)},
 		default: Sequelize.BOOLEAN
 	})
 
-	this.Photo.hasMany(this.Category);
-	this.Category.hasMany(this.Photo);
+	this.Image.hasMany(this.Category);
+	this.Category.hasMany(this.Image);
 
 	sequelize.sync().success(function() {
 		console.log('Database sync ok.')
 		// Check if root category exists or create it
-		self.Category.findOrCreate({id: 1, name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
+		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
 			if (created) {
-				console.log('Top level category root created.');
+				console.log('Top level category created.');
 			}
 			// Populate categories
-			self.getCategories(function(categories) {
-				self.categories = categories;
-			});
+			self.populateCategories();
 		});
 	}).error(function(error) {
 		console.log('Database sync error: '+error);
@@ -68,8 +67,18 @@ photodono.prototype = {
 		});
 	},
 
-	updateCategory: function(fields) {
-		console.log(fields);
+	updateCategory: function(category, cb) {
+		var self = this;
+		this.Category.findOrCreate({id: category.id}, _.omit(category, 'id')).success(function(cat, create) {
+			if (!create) {
+				cat.updateAttributes(_.omit(category, 'id')).success(function(){
+					self.populateCategories();
+					return cb(null, 'La gallerie a été mise à jour');
+				});
+			} else {
+				return cb(null, 'La  a été créée')
+			}
+		});
 	},
 
 	deleteCategory: function(fields) {
@@ -87,8 +96,19 @@ photodono.prototype = {
 		});
 	},
 
-	getImagesFromCategory: function($categoryName) {
-		client.smembers($categoryName);
+	populateCategories: function(cb) {
+		var self = this;
+		this.getCategories(function(categories) {
+			self.categories = categories;
+			if (cb)
+				cb();
+		})
+	},
+
+	getImagesFromCategory: function(id, cb) {
+		Category.getImages().success(function(images) {
+			cb(images);
+		});
 	},
 
 	getList: function(photosdir, listFiles, callback) {

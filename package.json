@@ -7,6 +7,7 @@
 	],
 	"author": "Christophe Beveraggi",
 	"dependencies": {
+		"underscore": "latest",
 		"express": "latest",
 		"jade": "latest",
 		"q": "latest",

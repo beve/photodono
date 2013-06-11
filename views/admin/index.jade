@@ -2,6 +2,7 @@ extends ../layout
 
 block append head
 	link(rel='stylesheet', href='/js/dijit/themes/claro/claro.css')
+	link(rel='stylesheet', href='/js/dojox/widget/Toaster/Toaster.css')
 	link(rel='stylesheet', href='/css/style.css')
 	link(rel='stylesheet', href='/css/admin.css')
 	script.
@@ -31,3 +32,6 @@ block append body
 		div(id='filestodelete')
 		input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteCancel', label='Cancel')
 		input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteConfirm', label='Delete')
+
+	div(data-dojo-type='dojox/widget/Toaster', data-dojo-props="positionDirection:'tr-down', duration:0, messageTopic:'toasterMessage'", id="toaster")
+</div>	
