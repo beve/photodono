@@ -12,6 +12,7 @@ var _ = require('underscore');
  var photodono = module.exports = function photodono(config) {
  	this.config = config;
 	this.categories = [];
+	this.imgdir = __dirname+'..'+path.sep+'..'+path.sep+path.normalize(this.config.imgdir);
 	var self = this;
 
 	// Connect to database
@@ -40,7 +41,9 @@ var _ = require('underscore');
 
 	this.ImageType = sequelize.define('ImageType', {
 		name: {type: Sequelize.STRING, unique: true, allowNull: false},
-		path: {type: Sequelize.STRING, unique: true, allowNull: false}
+		width: {type: Sequelize.INTEGER, allowNull: false},
+		height: {type: Sequelize.INTEGER, allowNull: false},
+		dir: {type: Sequelize.STRING, unique: true, allowNull: false}
 	});
 
 	this.Image.hasMany(this.Category);
@@ -48,7 +51,7 @@ var _ = require('underscore');
 	this.Image.hasMany(this.ImageType);
 	this.ImageType.hasMany(this.Image);
 
-	sequelize.sync(/*{force: true}*/).success(function() {
+	sequelize.sync({force: true}).success(function() {
 		console.log('Database synchronized.')
 		// Check if root category exists or create it
 		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
@@ -59,6 +62,17 @@ var _ = require('underscore');
 			self.populateCategories();
 		});
 		// Create default images types
+		self.config.imgtypes.forEach(function(imgtype) {
+			self.ImageType.findOrCreate({name: imgtype.name}, {name: imgtype.name, width: imgtype.width, height: imgtype.height, dir: imgtype.dir}).success(function(it, created) {
+				if (created) {
+					var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir);
+					if (!fs.existsSync(destDir)) {
+						mkdirp.sync(destDir)
+					}
+					console.log('Image type created: '+it.name);
+				}	
+			});
+		});
 	}).error(function(error) {
 		console.log('Database sync error: '+error);
 	})
@@ -83,10 +97,10 @@ photodono.prototype = {
 			if (!create) {
 				cat.updateAttributes(_.omit(category, 'id')).success(function(){
 					self.populateCategories();
-					return cb(null, 'La gallerie a été mise à jour');
+					return cb(null, 'La gallerie a été mise à jour', cat);
 				});
 			} else {
-				return cb(null, 'La  a été créée')
+				return cb(null, 'La gallerie a été créée', category);
 			}
 		});
 	},
@@ -116,7 +130,9 @@ photodono.prototype = {
 	},
 
 	getImagesFromCategory: function(id, cb) {
-		Category.getImages().success(function(images) {
+		console.log(id);
+		this.Image.find({where: {id: id}}).success(function(images) {
+			console.log(images);
 			cb(images);
 		});
 	},
@@ -175,35 +191,20 @@ photodono.prototype = {
 	processImage: function(buffer, filename, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
-		var destDir = __dirname+'..'+path.sep+'..'+path.sep+path.normalize(this.config.photos.tmpdir)+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];
-		console.log(destDir);
 		var self = this;
 		// Builld thumb
-		this.buildThumbnail(buffer, filename, destDir, m[4], config.thumb.w, config.thumb.h, function(err) {
-			if (err) {
-				console.log(err);
-				cb(err);
-				return;
+		this.config.imgtypes.forEach(function(imgtype) {
+			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
+			// Create directory if needed
+			if (!fs.existsSync(destDir)) {
+				mkdirp.sync(destDir)
 			}
-			// Build Fullsize
-			self.buildThumbnail(buffer, filename, destDir, m[4], config.photo.w,config.photo.h, function(err) {
-				if (err) {
-					console.log(err);
-					cb(err);
-					return;
-				}
-				// Save images infos with Redis
-			})
-		});
-	},
-
-	buildThumbnail: function(buffer, filename, destDir, destFile, w, h, cb) {
-		if (!fs.existsSync(destDir)) {
-			mkdirp.sync(destDir)
-		}
-		gm(buffer, filename).resize(w, h).write(destDir+path.sep+destFile, function(err) {
+			console.log(m[4]);
+			gm(buffer, filename).resize(imgtype.width, imgtype.height).autoOrient().write(path.normalize(destDir+path.sep+imgtype.dir+path.sep)+m[4], function(err) {
+				console.log(err);
 				return cb(err);
-		});
+			});
+		});	
 	},
 
 	del: function(path, callback) {

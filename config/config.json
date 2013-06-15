@@ -8,14 +8,26 @@
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
 	"imgdir": "public/Photos",
-	"thumb": {
-		"w" : 200,
-		"h" : 200
-	},
-	"photo" : {
-		"w" : 600,
-		"h" : 600
-	},
+	"imgtypes":  [
+			{
+				"name": "small",
+				"width": 200,
+				"height": 200,
+				"dir": "s"
+			},
+			{
+				"name": "medium",
+				"width": 400,
+				"height": 400,
+				"dir": "m"
+			},
+			{
+				"name": "big",
+				"width": 800,
+				"height": 800,
+				"dir": "b"
+			}
+		],
 	"database": {
 		"database": "photodono",
 		"protocol": "mysql",
@@ -26,7 +38,8 @@
 		"query": {
 			"pool" : false,
 			"debug" : false
-		}
+		},
+		"logging": false
 	},
   	"pass": "pouet"
 }

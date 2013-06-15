@@ -87,9 +87,9 @@ function initExpress() {
 	});
 
 	app.post('/category', function(req, res) {
-		photodono.updateCategory(req.body, function(err, msg) {
+		photodono.updateCategory(req.body, function(err, msg, returnedCategory) {
 			if (!err)
-				res.json({err: err, msg: msg});
+				res.json({err: err, msg: msg, category: returnedCategory});
 		});
 	});
 
@@ -148,15 +148,19 @@ function initExpress() {
 				var files = photodono.processZip(f.path, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
-						res.json(photodono.getImagesFromCategory(req.body.name));
+						photodono.getImagesFromCategory(req.body.id, function(images) {
+							res.json(images);
+						});
 					}
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(f.path, f.name, function(err) {
+				photodono.processImage(fs.readFileSync(f.path), f.name, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
-						res.json(photodono.getImagesFromCategory(req.body.name));
+						photodono.getImagesFromCategory(req.body.id, function(images) {
+							res.json(images);
+						});
 					}
 				});
 			}
