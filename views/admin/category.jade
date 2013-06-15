@@ -1,13 +1,11 @@
 - if (id) {
 	h1 Modification de la gallerie #{name}
 	submitLabel = 'Modifier la gallerie';
-	action = 'edit';
 - } else {
 	h1 Créer une gallerie 
 	submitLabel = 'Créer la gallerie'
-	action = 'new';
 - }
-form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='category', enctype='multipart/form-data', id='category')
+form(method='post', action='/category', id='category')
 	input(type='hidden', name='id', value='#{id}')
 	input(type='hidden', name='description', id='description', value='#{description}')
 	table
@@ -32,17 +30,6 @@ form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-do
 			td
 				div(name='position', data-dojo-type='dijit/form/NumberSpinner', data-dojo-props="smallDelta:1, constraints:{min:0,places:0}", value='#{position}', style="width:50px")
 		tr
-			- if (action == 'edit') {
-			td
-				label(for='uploadedFiles') Ajouter des photos 
-			td
-				button(type='file', name='uploadedFile', multiple='true', data-dojo-type='dojox/form/Uploader', label='Sélectionner les photos')
-			- } else {
-				td
-				td Créez la gallerie pour pouvoir ajouter des photos
-			- }
-		tr
 			td(colspan=2, style="text-align:center")
-				button(type='button', id='btnSubmitCategory', action='#{action}', label='#{submitLabel}', data-dojo-type='dijit/form/Button')
-					script(type='dojo/on', data-dojo-event='click').
-						adm.updateCategory('#{action}');
+				button(type='button', id='btnSubmitCategory', action='#{action}', label='#{submitLabel}', data-dojo-type='dijit/form/Button', data-dojo-props='onClick:function(){adm.updateCategory("#{action}");}')
+						

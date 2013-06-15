@@ -22,25 +22,34 @@ var _ = require('underscore');
 	});
 
 	this.Category = sequelize.define('Category', {
-		name: { type: Sequelize.STRING, allowNull: false},
+		name: { type: Sequelize.STRING, unique: true, allowNull: false},
 		heading: Sequelize.TEXT,
 		description: Sequelize.TEXT,
 		position: Sequelize.INTEGER,
-		parent: Sequelize.INTEGER
-	})
+		parent: Sequelize.INTEGER,
+		active: {type: Sequelize.BOOLEAN, default: false}
+	});
 
 	this.Image = sequelize.define('Image', {
 		name: { type: Sequelize.STRING, allowNull: false},
 		description: Sequelize.TEXT,
-		hash: { type: Sequelize.STRING(32)},
-		default: Sequelize.BOOLEAN
-	})
+		hash: { type: Sequelize.STRING(32), unique: true},
+		position: Sequelize.INTEGER,
+		active: { type: Sequelize.BOOLEAN, default: false}
+	});
+
+	this.ImageType = sequelize.define('ImageType', {
+		name: {type: Sequelize.STRING, unique: true, allowNull: false},
+		path: {type: Sequelize.STRING, unique: true, allowNull: false}
+	});
 
 	this.Image.hasMany(this.Category);
 	this.Category.hasMany(this.Image);
+	this.Image.hasMany(this.ImageType);
+	this.ImageType.hasMany(this.Image);
 
-	sequelize.sync().success(function() {
-		console.log('Database sync ok.')
+	sequelize.sync(/*{force: true}*/).success(function() {
+		console.log('Database synchronized.')
 		// Check if root category exists or create it
 		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
 			if (created) {
@@ -49,6 +58,7 @@ var _ = require('underscore');
 			// Populate categories
 			self.populateCategories();
 		});
+		// Create default images types
 	}).error(function(error) {
 		console.log('Database sync error: '+error);
 	})
@@ -143,7 +153,7 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, categoryName, filename, cb) {
+	processZip: function(file, filename, cb) {
 		var self = this;
 		var zip = new AdmZip(file);
 		zipEntries = zip.getEntries();
@@ -151,7 +161,7 @@ photodono.prototype = {
 		zipEntries.forEach(function(zipEntry) {
 			if (zipEntry.isDirectory == false) {
 				var buffer = zip.readFile(zipEntry);
-				self.processImage(buffer, categoryName, zipEntry.entryName, function(img) {
+				self.processImage(buffer, zipEntry.entryName, function(img) {
 					i++;
 					console.log('Resize OK');
 					if (i == zipEntries.length) {
@@ -162,7 +172,7 @@ photodono.prototype = {
 		});
 	},
 
-	processImage: function(buffer, categoryName, filename, cb) {
+	processImage: function(buffer, filename, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
 		var destDir = __dirname+'..'+path.sep+'..'+path.sep+path.normalize(this.config.photos.tmpdir)+path.sep+m[1]+path.sep+m[2]+path.sep+m[3];

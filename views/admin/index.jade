@@ -5,6 +5,8 @@ block append head
 	link(rel='stylesheet', href='/js/dojox/widget/Toaster/Toaster.css')
 	link(rel='stylesheet', href='/css/style.css')
 	link(rel='stylesheet', href='/css/admin.css')
+	link(rel='stylesheet', href='/js/dojox/form/resources/UploaderFileList.css')
+					
 	script.
 		var adm;
 		require(['admin', 'dojo/domReady!'], function(admin) {
@@ -15,7 +17,7 @@ block append body
 	div#mainBorderContainer(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="design:'headline', gutters:false, liveSplitters:true", style='width:100%;height:100%')	
 		div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'top'")
 			div#toolbar(data-dojo-type='dijit/Toolbar')
-				div(data-dojo-type='dijit/form/Button', id='btnNewCategory', label='Créer une gallerie', data-dojo-props="iconClass:'dijitEditorIcon dijitEditorIconWikiword'")
+				div(data-dojo-type='dijit/form/Button', id='btnNewCategory', label='Créer une gallerie', data-dojo-props="onClick: function() {adm.newCategory();},iconClass:'dijitEditorIcon dijitEditorIconWikiword'")
 		div(id='subBorderContainer', data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="region: 'center',design:'sidebar', gutters:true, liveSplitters:true", style='width:100%;height:100%')	
 			div(data-dojo-type='dijit/layout/BorderContainer', data-dojo-props="region: 'left', splitter: true, design: 'headline'", style='width:250px;height:100%')
 				div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center', splitter:true")
@@ -26,6 +28,7 @@ block append body
 
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center'", id='mainContent')
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom', splitter:true", id='thumbPane')
+				input(data-dojo-type='dijit/form/Button', data-dojo-props='onClick:function(){uploadDialog.show();}', label='+')
 
 	div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')
 		div Êtes vous sûr de vouloir supprimer ces fichiers ?
@@ -34,3 +37,8 @@ block append body
 		input(data-dojo-type='dijit/form/Button', type='button', id='mainMenuBtnDeleteConfirm', label='Delete')
 
 	div(data-dojo-type='dojox/widget/Toaster', data-dojo-props="positionDirection:'tr-down', duration:0, messageTopic:'toasterMessage'", id="toaster")
+
+	div(data-dojo-type='dijit/Dialog', data-dojo-id='uploadDialog', title='Envoyer des images')
+		form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='files', enctype='multipart/form-data', id='filesForm')
+			div(id='files', data-dojo-type='dojox/form/uploader/FileList', data-dojo-props="uploaderId:'uploader',headerFilename:'Fichier', headerFilesize:'Taille', headerIndex:'Num', headerType:'Type'")
+			button(type='file', id='uploader', multiple='true', data-dojo-type='dojox/form/Uploader', data-dojo-props='uploadOnSelect: true', label='Choisir les images', style='width:500px')

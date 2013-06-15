@@ -5,9 +5,4 @@ Nodejs and Dojo experimentations.
 
 Install:
 
-git submodules init
-git submodules update --recursive
-npm install
-
-
-
+ git clone --recursive https://github.com/beve/photodono && cd photodono && npm install

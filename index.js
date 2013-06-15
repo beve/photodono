@@ -4,7 +4,6 @@ var photodono = require('./src/server/photodono');
 var app = express();
 var path = require('path');
 var util = require('util');
-var Sequelize = require('sequelize');
 
 // Config
 var configFile = 'config/config.json';
@@ -50,7 +49,7 @@ function initExpress() {
 		app.set('views', 'views');
 		app.set('view engine', 'jade');
 		app.use(express.favicon('public/img/favicon.ico'));
-		app.use(express.bodyParser({uploadDir: __dirname+config.tmpdir}));
+		app.use(express.bodyParser({uploadDir: __dirname+path.sep+config.tmpdir}));
 		app.use(express.methodOverride());
 		app.use(express.cookieParser(config.secret));
 		app.use(express.static('public'));
@@ -136,11 +135,6 @@ function initExpress() {
 		var acceptedImgTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 		var filesDone = 0;
 
-		if (!req.body.name) {
-			res.json({err: 'No name for this category'});
-			return;
-		}
-
 		if (!req.files.uploadedFiles) {
 			res.json({err: 'No file provided'});
 			return;
@@ -151,7 +145,7 @@ function initExpress() {
 				res.json({err: 'File is empty'});
 			}
 			if (f.type == 'application/zip') {
-				var files = photodono.processZip(f.path, req.body.name, function(err) {
+				var files = photodono.processZip(f.path, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
 						res.json(photodono.getImagesFromCategory(req.body.name));
@@ -159,7 +153,7 @@ function initExpress() {
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(f.path, req.body.name, f.name, function(err) {
+				photodono.processImage(f.path, f.name, function(err) {
 					filesDone += 1;
 					if (req.files.uploadedFiles.length  == filesDone) {
 						res.json(photodono.getImagesFromCategory(req.body.name));

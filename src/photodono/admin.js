@@ -2,8 +2,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/dom-form',
 			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'dijit/form/SimpleTextarea', 'dijit/Toolbar', 
 			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner',
-			 'photodono', 'dojox/form/Uploader', 
-			 'dojox/widget/Toaster', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen'], 
+			 'photodono', 'dojox/form/Uploader',
+			 'dojox/widget/Toaster', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen', 'dojox/form/uploader/FileList'], 
 			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, dojoForm,
 				  registry, BorderContainer, Form, ContentPane, TextBox, ValidationTextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader, Toaster) {
 
@@ -71,6 +71,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 
 	bindEvents: function() {
 
+		return false;
 	  var self = this;
 
 	  on(registry.byId('btnNewCategory'), 'click', function(evt) {
@@ -149,6 +150,20 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		if (!registry.byId('category').validate()) {
 			return false;
 		}
+		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
+		  function(res) {
+		  	topic.publish("toasterMessage", {
+      				message: (res.err ? res.err : res.msg),
+       			type: (res.err ? 'fatal' : 'message'),
+      				duration: 1000
+    			 });
+		 },
+		 function(err) {
+		  console.log(err);
+		 });
+	},
+
+	updateCategory: function(action) {
 		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
 		  function(res) {
 		  	topic.publish("toasterMessage", {
