@@ -4,6 +4,7 @@ var photodono = require('./src/server/photodono');
 var app = express();
 var path = require('path');
 var util = require('util');
+var _ = require('underscore');
 
 // Config
 var configFile = 'config/config.json';
@@ -139,27 +140,34 @@ function initExpress() {
 			res.json({err: 'No file provided'});
 			return;
 		}
-
-		req.files.uploadedFiles.forEach(function(f) {
+		if (typeof(req.files.uploadedFiles[0][0]) == 'object') {
+			var ulf = req.files.uploadedFiles[0];
+		} else {
+			var ulf = req.files.uploadedFiles;
+		}
+		ulf.forEach(function(f) {
+			console.log('HOPHOPHOP');
 			if (f.size === 0) {
 				res.json({err: 'File is empty'});
 			}
 			if (f.type == 'application/zip') {
-				var files = photodono.processZip(f.path, function(err) {
+				var files = photodono.processZip(f.path, req.body.categoryId, function(err) {
 					filesDone += 1;
-					if (req.files.uploadedFiles.length  == filesDone) {
-						photodono.getImagesFromCategory(req.body.id, function(images) {
-							res.json(images);
+					if (ulf.length  == filesDone) {
+						photodono.getImagesFromCategory(req.body.categoryId, 'small', function(ret) {
+							console.log(ret);
+							return res.json(ret);
 						});
 					}
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(fs.readFileSync(f.path), f.name, function(err) {
+				photodono.processImage(fs.readFileSync(f.path), f.name, req.body.categoryId, function(err) {
 					filesDone += 1;
-					if (req.files.uploadedFiles.length  == filesDone) {
-						photodono.getImagesFromCategory(req.body.id, function(images) {
-							res.json(images);
+					console.log(ulf.length+' -- '+f.name+' -- '+f.type+' -- '+filesDone);
+					if (ulf.length  == filesDone) {
+						photodono.getImagesFromCategory(req.body.categoryId, 'small', function(ret) {
+							return res.json(ret);
 						});
 					}
 				});

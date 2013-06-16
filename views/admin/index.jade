@@ -40,6 +40,7 @@ block append body
 
 	div(data-dojo-type='dijit/Dialog', data-dojo-id='uploadDialog', title='Envoyer des images')
 		form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='files', enctype='multipart/form-data', id='filesForm')
-			div(id='files', data-dojo-type='dojox/form/uploader/FileList', data-dojo-props="uploaderId:'uploader',headerFilename:'Fichier', headerFilesize:'Taille', headerIndex:'Num', headerType:'Type'")
-			button(type='file', id='uploader', multiple='true', name='uploadedFile', data-dojo-type='dojox/form/Uploader', data-dojo-props='uploadOnSelect: true', label='Choisir les images', style='width:500px')
-			input(type="hidden", name="idCategory", id="idCategory")
+			input(type='hidden', data-dojo-type='dijit/form/TextBox', name='categoryId', id='categoryId')
+			button(type='file', id='uploader', multiple='true', name='uploadedFile', data-dojo-type='dojox/form/Uploader', data-dojo-props='onComplete: function() {console.log("pouet");}', label='Choisir les images', style='width:500px')
+			button(type='submit', data-dojo-type='dijit/form/Button', label='Envoyer')
+			div(id='files', data-dojo-type='dojox/form/uploader/FileList', data-dojo-props="uploaderId:'uploader',headerFilename:'Fichier', headerFilesize:'Taille', headerIndex:'Num', headerType:'Type'", style='display:none')

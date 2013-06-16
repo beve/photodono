@@ -12,14 +12,15 @@ var _ = require('underscore');
  var photodono = module.exports = function photodono(config) {
  	this.config = config;
 	this.categories = [];
-	this.imgdir = __dirname+'..'+path.sep+'..'+path.sep+path.normalize(this.config.imgdir);
+	this.imgdir = __dirname+'..'+path.sep+'..'+path.sep+'..'+path.sep+path.normalize(this.config.imgdir);
 	var self = this;
 
 	// Connect to database
 	var sequelize = new Sequelize(config.database.database, config.database.user, config.database.password, {
 		host: config.database.host,
 		port: config.database.port,
-		dialect: config.database.protocol
+		dialect: config.database.protocol,
+		logging: config.database.logging
 	});
 
 	this.Category = sequelize.define('Category', {
@@ -34,22 +35,24 @@ var _ = require('underscore');
 	this.Image = sequelize.define('Image', {
 		name: { type: Sequelize.STRING, allowNull: false},
 		description: Sequelize.TEXT,
-		hash: { type: Sequelize.STRING(32), unique: true},
+		path: { type: Sequelize.STRING, unique: true},
 		position: Sequelize.INTEGER,
 		active: { type: Sequelize.BOOLEAN, default: false}
 	});
 
+	/*
 	this.ImageType = sequelize.define('ImageType', {
 		name: {type: Sequelize.STRING, unique: true, allowNull: false},
 		width: {type: Sequelize.INTEGER, allowNull: false},
 		height: {type: Sequelize.INTEGER, allowNull: false},
 		dir: {type: Sequelize.STRING, unique: true, allowNull: false}
 	});
+	*/
 
 	this.Image.hasMany(this.Category);
 	this.Category.hasMany(this.Image);
-	this.Image.hasMany(this.ImageType);
-	this.ImageType.hasMany(this.Image);
+	/*this.ImageType.hasMany(this.Image);
+	this.Image.hasMany(this.ImageType);*/
 
 	sequelize.sync({force: true}).success(function() {
 		console.log('Database synchronized.')
@@ -61,6 +64,7 @@ var _ = require('underscore');
 			// Populate categories
 			self.populateCategories();
 		});
+		/*
 		// Create default images types
 		self.config.imgtypes.forEach(function(imgtype) {
 			self.ImageType.findOrCreate({name: imgtype.name}, {name: imgtype.name, width: imgtype.width, height: imgtype.height, dir: imgtype.dir}).success(function(it, created) {
@@ -73,6 +77,7 @@ var _ = require('underscore');
 				}	
 			});
 		});
+		*/
 	}).error(function(error) {
 		console.log('Database sync error: '+error);
 	})
@@ -129,11 +134,11 @@ photodono.prototype = {
 		})
 	},
 
-	getImagesFromCategory: function(id, cb) {
-		console.log(id);
+	getImagesFromCategory: function(id, fileType, cb) {
+		var self = this;
 		this.Image.find({where: {id: id}}).success(function(images) {
-			console.log(images);
-			cb(images);
+			console.log(images.dataValues);
+			cb({images: images.dataValues, path: self.config.imgdir+_.where(self.config.imgtypes, {name: fileType}).dir});
 		});
 	},
 
@@ -169,7 +174,7 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, filename, cb) {
+	processZip: function(file, filename, categoryId, cb) {
 		var self = this;
 		var zip = new AdmZip(file);
 		zipEntries = zip.getEntries();
@@ -177,32 +182,47 @@ photodono.prototype = {
 		zipEntries.forEach(function(zipEntry) {
 			if (zipEntry.isDirectory == false) {
 				var buffer = zip.readFile(zipEntry);
-				self.processImage(buffer, zipEntry.entryName, function(img) {
+				self.processImage(buffer, zipEntry.entryName, categoryId, function(err) {
 					i++;
 					console.log('Resize OK');
 					if (i == zipEntries.length) {
 						console.log('Unzip and resize ok');
+						return cb(err);
 					}
 				});
 			}
 		});
 	},
 
-	processImage: function(buffer, filename, cb) {
+	processImage: function(buffer, filename, categoryId, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
+		var fileExt= filename.split('.').pop();
+		var imgPath = path.normalize(m[1]+path.sep+m[2]+path.sep+m[3]+path.sep+m[4]+'.'+fileExt);
 		var self = this;
+		console.log('IMG');
 		// Builld thumb
 		this.config.imgtypes.forEach(function(imgtype) {
 			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
+			var destImg = destDir+path.sep+m[4]+'.'+fileExt;
 			// Create directory if needed
 			if (!fs.existsSync(destDir)) {
 				mkdirp.sync(destDir)
 			}
-			console.log(m[4]);
-			gm(buffer, filename).resize(imgtype.width, imgtype.height).autoOrient().write(path.normalize(destDir+path.sep+imgtype.dir+path.sep)+m[4], function(err) {
-				console.log(err);
-				return cb(err);
+			gm(buffer, filename).resize(imgtype.width, imgtype.height).autoOrient().write(destImg, function(err) {
+				if (err)
+					return cb(err);
+				var toBeInserted = {name: filename, active: 1, path: imgPath};
+				self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
+					self.Category.find(categoryId).success(function(category) {
+						img.addCategory(category);
+						return cb();
+					}).error(function(err) {
+						return cb(err);
+					});
+				}).error(function(err) {
+					return cb(err);
+				});
 			});
 		});	
 	},

@@ -124,7 +124,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		var self = this;
 		registry.byId('thumbPane').domNode.style.display = 'block';
 		registry.byId('subBorderContainer').resize();
-		dom.byId('idCategory').value = item.id;
+		dom.byId('categoryId').value = item.id;
 		request.get('/category/'+item.id, {handleAs:'json'}).then(
 		  function(res) {
 		  	self.updateMainContent(res.content);
@@ -158,7 +158,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
        			type: (res.err ? 'fatal' : 'message'),
       				duration: 1000
     			 });
-			dom.getId('idCategory').value = res.category.id;
+			dom.getId('categoryId').value = res.category.id;
 		 },
 		 function(err) {
 		  console.log(err);
