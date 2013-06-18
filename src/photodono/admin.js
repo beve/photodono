@@ -1,24 +1,38 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/dom-construct', 
+define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Deferred', 'dojo/aspect', 'dojo/on', 'dojo/dom', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/dom-construct', 
 			 'dojo/dom-prop', 'dojo/query', 'dojo/request', 'dojo/parser', 'dojo/store/Memory', 'dojo/store/Observable', 'dojo/topic', 'dojo/json', 'dojo/dom-form',
 			 'dijit/registry', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'dijit/form/SimpleTextarea', 'dijit/Toolbar', 
-			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner',
-			 'photodono', 'dojox/form/Uploader',
+			 'dijit/ToolbarSeparator', 'dijit/Dialog', 'dijit/Tree', 'dijit/tree/ObjectStoreModel', 'dijit/tree/dndSource', 'dijit/Editor', 'dijit/form/NumberSpinner', 'dijit/ProgressBar',			 'photodono', 'dojox/form/Uploader',
 			 'dojox/widget/Toaster', 'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/FontChoice', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/FullScreen', 'dojox/form/uploader/FileList'], 
-			function(declare, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, dojoForm,
-				  registry, BorderContainer, Form, ContentPane, TextBox, ValidationTextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, photodono, Uploader, Toaster) {
+			function(declare, url, array, lang, Deferred, aspect, on, dom, domAttr, domStyle, domConstruct, domProp, query, request, parser, Memory, Observable, topic, JSON, dojoForm,
+				  registry, BorderContainer, Form, ContentPane, TextBox, ValidationTextBox, Button, SimpleTextarea, Toolbar, ToolbarSeparator, Dialog , Tree, ObjectStoreModel, dndSource, Editor, NumberSpinner, ProgressBar, photodono, Uploader,  Toaster) {
 
   return declare(null, {
 
-	constructor: function() {
+  	constructor: function() {
+  		this.initSocketIo();
+  		this.photodono = new photodono();
+  		this.photodono.getCategories(lang.hitch(this, function(err) {
+  			if (!err) {
+  				this.buildTree();
+  				this.bindEvents();
+  			}
+  		}));
+  	},
 
-	  this.photodono = new photodono();
-	  this.photodono.getCategories(lang.hitch(this, function(err) {
-		if (!err) {
-		  this.buildTree();
-		  this.bindEvents();
-		}
-	  }));
-	},
+  	initSocketIo: function() {
+  		var self = this;
+  		this.socket = io.connect((new url(document.URL).scheme)+'://'+(new url(document.URL).authority));
+  		this.socket.emit('connection');
+  		this.socket.on('connected', function(socketId) {
+  			self.socket.id = socketId;
+  		})
+  		this.socket.on('imageprocessed', function(data) {
+  			var progressbar = registry.byId('progressbar');
+  			if (typeof(progressbar) != undefined) {
+	  			progressbar.set({value: data.percent});
+  			}
+  		})
+  	},
 
 	buildTree: function() {
 
@@ -125,6 +139,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
 		registry.byId('thumbPane').domNode.style.display = 'block';
 		registry.byId('subBorderContainer').resize();
 		dom.byId('categoryId').value = item.id;
+		dom.byId('socketId').value = this.socket.id;
 		request.get('/category/'+item.id, {handleAs:'json'}).then(
 		  function(res) {
 		  	self.updateMainContent(res.content);

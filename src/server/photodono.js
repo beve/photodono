@@ -174,7 +174,7 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, filename, categoryId, cb) {
+	processZip: function(file, filename, categoryId, socket, cb) {
 		var self = this;
 		var zip = new AdmZip(file);
 		zipEntries = zip.getEntries();
@@ -182,7 +182,7 @@ photodono.prototype = {
 		zipEntries.forEach(function(zipEntry) {
 			if (zipEntry.isDirectory == false) {
 				var buffer = zip.readFile(zipEntry);
-				self.processImage(buffer, zipEntry.entryName, categoryId, function(err) {
+				self.processImage(buffer, zipEntry.entryName, categoryId, socket, function(err) {
 					i++;
 					console.log('Resize OK');
 					if (i == zipEntries.length) {
@@ -194,13 +194,14 @@ photodono.prototype = {
 		});
 	},
 
-	processImage: function(buffer, filename, categoryId, cb) {
+	processImage: function(buffer, filename, categoryId, socket, cb) {
 		var md5 = crypto.createHash('md5').update(buffer).digest('hex')
 		var m = md5.match(/^([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]{1})([a-z0-9]*)/);
 		var fileExt= filename.split('.').pop();
 		var imgPath = path.normalize(m[1]+path.sep+m[2]+path.sep+m[3]+path.sep+m[4]+'.'+fileExt);
 		var self = this;
-		console.log('IMG');
+		var filesDone = 0;
+		var numFilesToProcess = this.config.imgtypes.length;
 		// Builld thumb
 		this.config.imgtypes.forEach(function(imgtype) {
 			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
@@ -212,17 +213,23 @@ photodono.prototype = {
 			gm(buffer, filename).resize(imgtype.width, imgtype.height).autoOrient().write(destImg, function(err) {
 				if (err)
 					return cb(err);
-				var toBeInserted = {name: filename, active: 1, path: imgPath};
-				self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
-					self.Category.find(categoryId).success(function(category) {
-						img.addCategory(category);
-						return cb();
+				if (filesDone == 0) {
+					var toBeInserted = {name: filename, active: 1, path: imgPath};
+					self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
+						self.Category.find(categoryId).success(function(category) {
+							img.addCategory(category);
+						}).error(function(err) {
+							return cb(err);
+						});
 					}).error(function(err) {
 						return cb(err);
 					});
-				}).error(function(err) {
-					return cb(err);
-				});
+				} 
+				filesDone++;
+				socket.emit('imageprocessed', {image: filename, percent: (filesDone*100/numFilesToProcess)});
+				if (filesDone == numFilesToProcess) {
+					return cb();
+				}
 			});
 		});	
 	},

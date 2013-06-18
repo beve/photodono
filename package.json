@@ -9,6 +9,7 @@
 	"dependencies": {
 		"underscore": "latest",
 		"express": "latest",
+		"socket.io": "latest",
 		"jade": "latest",
 		"q": "latest",
 		"pg": "latest",

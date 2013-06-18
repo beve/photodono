@@ -3,6 +3,8 @@ head
   block head
     meta(charset='utf-8')
     link(rel='shortcut icon', href='/favicon.ico', type='image/x-icon')
+    script(src='/socket.io/socket.io.js')
+
     script.
       var dojoConfig = {async: true, parseOnLoad:true, packages:[{name: 'dijit', location: '/js/dijit'}, {name: 'photodono', location: '/js/photodono', main: 'photodono'}, {name: 'admin', location: '/js/photodono', main: 'admin'}], tlmSiblingOfDojo: false, isDebug: true};
     script(src='/js/dojo/dojo.js')
