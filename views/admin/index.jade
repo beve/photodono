@@ -42,8 +42,7 @@ block append body
 		form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='files', enctype='multipart/form-data', id='filesForm')
 			input(type='hidden', data-dojo-type='dijit/form/TextBox', name='categoryId', id='categoryId')
 			input(type='hidden', data-dojo-type='dijit/form/TextBox', name='socketId', id='socketId')
-			button(type='file', id='uploader', multiple='true', name='uploadedFile', data-dojo-type='dojox/form/Uploader', data-dojo-props='onComplete: function() {console.log("pouet");}', label='Choisir les images', style='width:500px')
-			button(type='submit', data-dojo-type='dijit/form/Button', label='Envoyer')
-			div(id='files', data-dojo-type='dojox/form/uploader/FileList', data-dojo-props="uploaderId:'uploader',headerFilename:'Fichier', headerFilesize:'Taille', headerIndex:'Num', headerType:'Type'")
-			div
-				div(data-dojo-type="dijit/ProgressBar", style="width:300px", data-dojo-id="myProgressBar", id="progressbar", data-dojo-props="maximum:100")
+			button(type='file', id='uploader', multiple='true', name='uploadedFile', data-dojo-type='dojox/form/Uploader', data-dojo-props='onComplete: function() {adm.filesSent()}', label='Choisir les images', style='width:500px')
+			button(type='submit', data-dojo-type='dijit/form/Button', label='Envoyer', data-dojo-props='onClick: function() {adm.sendFiles();}')
+			div(id='fileList', data-dojo-type='dojox/form/uploader/FileList', data-dojo-props="uploaderId:'uploader',headerFilename:'Fichier', headerFilesize:'Taille', headerIndex:'Num', headerType:'Type'", style="display:none")
+			div#progressbarContainer

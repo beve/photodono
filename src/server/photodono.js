@@ -203,6 +203,7 @@ photodono.prototype = {
 		var filesDone = 0;
 		var numFilesToProcess = this.config.imgtypes.length;
 		// Builld thumb
+		socket.emit('beginImageProcessing', {image: filename, hash: md5});
 		this.config.imgtypes.forEach(function(imgtype) {
 			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
 			var destImg = destDir+path.sep+m[4]+'.'+fileExt;
@@ -226,7 +227,7 @@ photodono.prototype = {
 					});
 				} 
 				filesDone++;
-				socket.emit('imageprocessed', {image: filename, percent: (filesDone*100/numFilesToProcess)});
+				socket.emit('imageProcessing', {name: filename, hash: md5, percent: (filesDone*100/numFilesToProcess)});
 				if (filesDone == numFilesToProcess) {
 					return cb();
 				}

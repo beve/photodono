@@ -11,6 +11,7 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
   	constructor: function() {
   		this.initSocketIo();
   		this.photodono = new photodono();
+  		this.progressbars = {};
   		this.photodono.getCategories(lang.hitch(this, function(err) {
   			if (!err) {
   				this.buildTree();
@@ -25,13 +26,13 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
   		this.socket.emit('connection');
   		this.socket.on('connected', function(socketId) {
   			self.socket.id = socketId;
-  		})
-  		this.socket.on('imageprocessed', function(data) {
-  			var progressbar = registry.byId('progressbar');
-  			if (typeof(progressbar) != undefined) {
-	  			progressbar.set({value: data.percent});
-  			}
-  		})
+  		});
+  		this.socket.on('beginImageProcessing', function(data) {
+  			self.progressbars[data.hash] = new ProgressBar({}).placeAt('progressbarContainer');
+  		});
+  		this.socket.on('imageProcessing', function(data) {
+  			self.progressbars[data.hash].set({value: data.percent});
+  		});
   	},
 
 	buildTree: function() {
@@ -83,14 +84,19 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 	  this.tree.startup();
 	},
 
+	sendFiles: function() {
+	  	domStyle.set('fileList', 'display', 'block');
+	  	domConstruct.empty('progressbarContainer');
+	},
+
+	filesSent: function() {
+	  	domStyle.set('fileList', 'display', 'none');
+	  	domConstruct.empty('progressbarContainer').set('html', 'pouet');
+	},
+
 	bindEvents: function() {
 
-		return false;
 	  var self = this;
-
-	  on(registry.byId('btnNewCategory'), 'click', function(evt) {
-	  	self.newCategory();
-	  });
 
 	  return;
 
@@ -121,15 +127,6 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 		  console.log(err);
 		});
 		topic.publish('mainMenuButtonPressed', this.id);
-	  });
-
-	  on(registry.byId('mainMenuBtnUpload'), 'click', function(evt) {
-		registry.byId('popupUpload').show();
-		topic.publish('mainMenuButtonPressed', this.id);
-	  });
-
-	  topic.subscribe('mainMenuButtonPressed', function(text) {
-		console.log(text);
 	  });
 
 	},
@@ -166,6 +163,8 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 		if (!registry.byId('category').validate()) {
 			return false;
 		}
+	  	domConstruct.empty('progressbarContainer');
+	  	domStyle.set('fileList', 'display', 'block');
 		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
 		  function(res) {
 		  	topic.publish("toasterMessage", {
@@ -238,7 +237,7 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 	  loadThumbnails: function(item) {
 		var center = dom.byId('center');
 		var found = 0;
-		domConstruct.empty(dom.byId('center'), 'html', '');
+		domConstruct.empty(dom.byId('center'));
 		var childs = this.photosStore.query({parent: this.tree.selectedItems[0].id});
 		childs.forEach(function(child) {
 		  if (child.path.indexOf('_min') != -1) {
