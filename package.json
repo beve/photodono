@@ -12,7 +12,6 @@
     "socket.io": "latest",
     "jade": "latest",
     "q": "latest",
-    "pg": "latest",
     "mysql": "latest",
     "sequelize": "latest",
     "nodemailer": "latest",
@@ -24,7 +23,7 @@
   },
   "license": "GPL v2",
   "bin": {
-    "captain": "server.js"
+    "photodono": "index.js"
   },
   "devDependencies": {
     "jshint": "*",
