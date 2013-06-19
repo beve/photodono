@@ -7,7 +7,8 @@
 	},
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
-	"imgdir": "public/Photos",
+	"staticdir": "public",
+	"imgdir": "Photos",
 	"imgtypes":  [
 			{
 				"name": "small",
@@ -39,7 +40,7 @@
 			"pool" : false,
 			"debug" : false
 		},
-		"logging": true 
+		"logging": false
 	},
   	"pass": "pouet"
 }

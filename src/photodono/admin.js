@@ -38,6 +38,12 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
   		});
   	},
 
+  	getThumbnails: function(args, cb) {
+		this.photodono.getThumbnails({categoryId: categoryId}, lang.hitch(this, function(thumbs) {
+			this.displayThumbnails(thumbs);
+		}));
+  	},		
+
 	buildTree: function() {
 
 	  var self = this;
@@ -76,9 +82,7 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 		openOnClick: false,
 		autoExpand: false,
 		onClick: function(item) {
-		  //self.updateMainMenu(item);
 		  self.editCategory(item);		
-		  //self.loadThumbnails(item);
 		},
 		getIconClass: function(item, opened){
 		  return (opened ? 'dijitFolderOpened' : 'dijitFolderClosed');
@@ -94,10 +98,21 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 
 	filesSent: function(thumbs) {
 	  	domConstruct.empty('progressbarContainer');
-	  	this.populateThumbs(thumbs);
+	  	this.displayThumbnails(thumbs);
 	},
 
-	populateThumbs: function(thumbs) {
+	displayThumbnails: function(thumbs) {
+		console.log(thumbs);
+		var thumbsDir = dom.byId('thumbsContainer');
+		domConstruct.empty(thumbsDir);
+		if (typeof(thumbs.files == 'array') && thumbs.files.length > 0) {
+			thumbs.files.forEach(function(thumb) {
+				var div = domConstruct.create('div', {class: "thumb"}, thumbsDir);
+				var img = domConstruct.create('img', {src: thumbs.path+'/'+thumb.path, class: 'thumb'}, div);
+			});
+		} else {
+			domConstruct.create('div', {innerHTML: 'No image in this directory'}, thumbsDir);
+		}
 	},
 
 	bindEvents: function() {
@@ -146,6 +161,7 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 		request.get('/category/'+item.id, {handleAs:'json'}).then(
 		  function(res) {
 		  	self.updateMainContent(res.content);
+		  	self.displayThumbnails(res.images);
 		 },
 		 function(err) {
 		  console.log(err);
@@ -218,24 +234,8 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 		  }
 		}
 		});
-	  },
-
-	  loadThumbnails: function(item) {
-		var center = dom.byId('center');
-		var found = 0;
-		domConstruct.empty(dom.byId('center'));
-		var childs = this.photosStore.query({parent: this.tree.selectedItems[0].id});
-		childs.forEach(function(child) {
-		  if (child.path.indexOf('_min') != -1) {
-			var div = domConstruct.create('div', {class: "vignette"}, center);
-			var img = domConstruct.create('img', {src: '/Photos/'+child.path}, div);
-			found += 1;
-		  }
-		});
-		if (found === 0) {
-		  domConstruct.create('div', {innerHTML: 'No image in this directory'}, center);
-		}
 	  }
+
   });
 
 });

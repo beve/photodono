@@ -28,7 +28,8 @@ block append body
 
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center'", id='mainContent')
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom', splitter:true", id='thumbPane')
-				input(data-dojo-type='dijit/form/Button', data-dojo-props='onClick:function(){uploadDialog.show();}', label='+')
+				input(data-dojo-type='dijit/form/Button', id='btnAddImages', data-dojo-props='onClick:function(){uploadDialog.show();}', label='+')
+				div#thumbsContainer(class='clearfix')
 
 	div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')
 		div Êtes vous sûr de vouloir supprimer ces fichiers ?

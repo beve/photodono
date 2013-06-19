@@ -12,7 +12,6 @@ var _ = require('underscore');
  var photodono = module.exports = function photodono(config) {
  	this.config = config;
 	this.categories = [];
-	this.imgdir = __dirname+'..'+path.sep+'..'+path.sep+'..'+path.sep+path.normalize(this.config.imgdir);
 	var self = this;
 
 	// Connect to database
@@ -90,9 +89,15 @@ photodono.prototype = {
 
 	},
 
-	getCategory: function(id, cb) {
+	getCategory: function(id, args, cb) {
+		var self = this;
+		args = args || {};
 		this.Category.find({where: {id: id}, attributes: ['id', 'name', 'heading', 'description', 'position']}).success(function(category) {
-			return cb(category.selectedValues);
+			category.getImages(args).success(function(images) {
+				catObj = category.selectedValues;
+				_.extend(catObj, {images:{files: images, path: self.config.imgdir+path.sep+_.where(self.config.imgtypes, {name: 'small'})[0].dir}});
+				return cb(catObj);
+			});
 		});
 	},
 
@@ -118,8 +123,15 @@ photodono.prototype = {
 		var self = this;
 		var ret = [];
 		self.Category.findAll({attributes: ['id', 'name', 'heading', 'description', 'position']}).success(function(categories) {
-			categories.forEach(function(cat) {
-				ret.push(cat.selectedValues);
+			categories.forEach(function(category) {
+				ret.push(category);
+				/*
+				category.getImages().success(function(images) {
+					catObj = category.selectedValues;
+					_.extend(catObj, {images:{files: images, path: self.config.imgdir+path.sep+_.where(self.config.imgtypes, {name: 'small'})[0].dir}});
+					ret.push(catObj);
+				});
+				*/
 			});
 			cb(ret);
 		});
@@ -205,22 +217,22 @@ photodono.prototype = {
 		var self = this;
 		var filesDone = 0;
 		var numFilesToProcess = this.config.imgtypes.length;
+		var imgdir = __dirname+'..'+path.sep+'..'+path.sep+'..'+path.sep+path.normalize(this.config.staticdir)+path.sep+path.normalize(this.config.imgdir);
 		// Builld thumb
 		socket.send('Traitement des images et génération des miniatures');
 		socket.emit('beginImageProcessing', {image: filename, hash: md5});
 		this.config.imgtypes.forEach(function(imgtype) {
-			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
+			var destDir = path.normalize(imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
 			var destImg = destDir+path.sep+m[4]+'.'+fileExt;
 			// Create directory if needed
 			if (!fs.existsSync(destDir)) {
 				mkdirp.sync(destDir)
 			}
-			gm(buffer, filename).resize(imgtype.width, imgtype.height).autoOrient().write(destImg, function(err) {
+			gm(buffer, filename).resize(imgtype.width, imgtype.height).write(destImg, function(err) {
 				if (err)
 					return cb(err);
 				if (filesDone == 0) {
 					var toBeInserted = {name: filename, active: 1, path: imgPath};
-					console.log(toBeInserted);
 					self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
 						self.Category.find(categoryId).success(function(category) {
 							img.addCategory(category);

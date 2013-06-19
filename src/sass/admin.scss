@@ -36,3 +36,26 @@ h1 {
 #currentAction {
 	font-weight: bold;
 }
+
+
+.thumbsContainer {
+	position: relative;
+}
+
+#btnAddImages {
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	top:5px;
+	left:5px;
+}  
+
+.thumb {
+	float: left;
+	width: 100px;
+	height: 100px;
+	margin-left: 5px;
+	:nth-child(1) {
+		margin-left: 0
+	}
+}

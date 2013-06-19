@@ -56,7 +56,7 @@ function initExpress() {
 		app.use(express.bodyParser({uploadDir: __dirname+path.sep+config.tmpdir}));
 		app.use(express.methodOverride());
 		app.use(express.cookieParser(config.secret));
-		app.use(express.static('public'));
+		app.use(express.static(config.staticdir));
 		app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 		app.use(express.session());
 		app.use(app.router);
@@ -76,9 +76,9 @@ function initExpress() {
 
 	app.get('/category/:id', function(req, res) {
 		if (req.params.id) {
-			photodono.getCategory(req.params.id, function(category) {
+			photodono.getCategory(req.params.id, {}, function(category) {
 				res.render('admin/category', category, function(err, content) {
-					res.json({content: content, photos: category.photos});
+					res.json({content: content, images: category.images});
 				});
 			});
 		}
@@ -99,6 +99,15 @@ function initExpress() {
 
 	app.get('/categories', function(req, res) {
 		res.json(photodono.categories);
+	});
+
+	app.get('/thumbnails', function(req, res) {
+		console.log(req.query);
+		order = req.query.order || null;
+		limit = req.query.limit || null;
+		res.json(photodono.getImagesFromCategory(req.query.categoryId, 'small', order, limit, function(thumbs) {
+			res.json(thumbs);
+		}));
 	});
 
 	app.get('/login', function(req, res) {

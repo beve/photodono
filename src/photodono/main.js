@@ -7,12 +7,23 @@ define(['dojo/_base/declare', 'dojo/request', 'dojo/json', 'dojo/_base/lang'], f
       constructor: function() {
       },
 
-      getCategories: function(callback) {
+      getCategories: function(cb) {
         var self = this;
         request("/categories", {handleAs:'json'}).then(
            function(categories) {
              self.categories = categories;
-             callback(null);
+             cb(null);
+           },
+           function(err) {
+             console.log(err);
+           }
+         );
+       },
+
+      getThumbnails: function(args, cb) {
+        request.get("/thumbnails", {handleAs:'json', data: args}).then(
+           function(thumbs) {
+             cb(thumbs);
            },
            function(err) {
              console.log(err);
