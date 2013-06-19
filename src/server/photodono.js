@@ -54,7 +54,7 @@ var _ = require('underscore');
 	/*this.ImageType.hasMany(this.Image);
 	this.Image.hasMany(this.ImageType);*/
 
-	sequelize.sync({force: true}).success(function() {
+	sequelize.sync(/*{force: true}*/).success(function() {
 		console.log('Database synchronized.')
 		// Check if root category exists or create it
 		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
@@ -134,11 +134,15 @@ photodono.prototype = {
 		})
 	},
 
-	getImagesFromCategory: function(id, fileType, cb) {
+	getImagesFromCategory: function(id, fileType, order, limit, cb) {
 		var self = this;
-		this.Image.find({where: {id: id}}).success(function(images) {
-			console.log(images.dataValues);
-			cb({images: images.dataValues, path: self.config.imgdir+_.where(self.config.imgtypes, {name: fileType}).dir});
+		var args = {};
+		if (order) args.order = order;
+		if (limit) args.limit = limit;
+		this.Category.find({where: {id: id}}).success(function(category) {
+			category.getImages(args).success(function(images) {
+				cb({images: images, path: self.config.imgdir+path.sep+_.where(self.config.imgtypes, {name: fileType})[0].dir});
+			});
 		});
 	},
 
@@ -174,7 +178,8 @@ photodono.prototype = {
 		self.list = objectStoreModel;
 	},
 
-	processZip: function(file, filename, categoryId, socket, cb) {
+	processZip: function(file, categoryId, socket, cb) {
+		socket.send('Décompression du Zip');
 		var self = this;
 		var zip = new AdmZip(file);
 		zipEntries = zip.getEntries();
@@ -184,9 +189,7 @@ photodono.prototype = {
 				var buffer = zip.readFile(zipEntry);
 				self.processImage(buffer, zipEntry.entryName, categoryId, socket, function(err) {
 					i++;
-					console.log('Resize OK');
 					if (i == zipEntries.length) {
-						console.log('Unzip and resize ok');
 						return cb(err);
 					}
 				});
@@ -203,6 +206,7 @@ photodono.prototype = {
 		var filesDone = 0;
 		var numFilesToProcess = this.config.imgtypes.length;
 		// Builld thumb
+		socket.send('Traitement des images et génération des miniatures');
 		socket.emit('beginImageProcessing', {image: filename, hash: md5});
 		this.config.imgtypes.forEach(function(imgtype) {
 			var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
@@ -216,6 +220,7 @@ photodono.prototype = {
 					return cb(err);
 				if (filesDone == 0) {
 					var toBeInserted = {name: filename, active: 1, path: imgPath};
+					console.log(toBeInserted);
 					self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
 						self.Category.find(categoryId).success(function(category) {
 							img.addCategory(category);
@@ -229,7 +234,7 @@ photodono.prototype = {
 				filesDone++;
 				socket.emit('imageProcessing', {name: filename, hash: md5, percent: (filesDone*100/numFilesToProcess)});
 				if (filesDone == numFilesToProcess) {
-					return cb();
+					return cb(err);
 				}
 			});
 		});	

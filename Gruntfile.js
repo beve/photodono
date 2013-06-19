@@ -16,20 +16,8 @@ module.exports = function(grunt) {
 					app: 'stand_alone',
 					environment: 'production'
 				}
-			},
-			dev: {
-				options: {
-					sassDir: 'src/sass',
-					cssDir: 'public/css',
-					javascriptsDir: 'public/js',
-					imagesDir: 'public/img',
-					fontsDir: 'public/fonts',
-					app: 'stand_alone',
-					environment: 'production'
-				}
 			}
-		}
-
+		},
 		dojo: {
 			dist: {
 				options: {
@@ -48,6 +36,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-compass');
 	grunt.loadNpmTasks('grunt-dojo');
 
-	grunt.registerTask('default', ['compass', 'dojo']);
+	grunt.registerTask('default', ['compass']);
 
 };

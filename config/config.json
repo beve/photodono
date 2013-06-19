@@ -39,7 +39,7 @@
 			"pool" : false,
 			"debug" : false
 		},
-		"logging": false
+		"logging": true 
 	},
   	"pass": "pouet"
 }

@@ -33,6 +33,9 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
   		this.socket.on('imageProcessing', function(data) {
   			self.progressbars[data.hash].set({value: data.percent});
   		});
+  		this.socket.on('message', function(msg) {
+  			dom.byId('activityMessage').innerHTML = msg;
+  		});
   	},
 
 	buildTree: function() {
@@ -85,13 +88,16 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 	},
 
 	sendFiles: function() {
+		dom.byId('activityMessage').innerHTML = 'Envoi des fichiers';
 	  	domStyle.set('fileList', 'display', 'block');
-	  	domConstruct.empty('progressbarContainer');
 	},
 
-	filesSent: function() {
-	  	domStyle.set('fileList', 'display', 'none');
-	  	domConstruct.empty('progressbarContainer').set('html', 'pouet');
+	filesSent: function(thumbs) {
+	  	domConstruct.empty('progressbarContainer');
+	  	this.populateThumbs(thumbs);
+	},
+
+	populateThumbs: function(thumbs) {
 	},
 
 	bindEvents: function() {
@@ -157,26 +163,6 @@ define(['dojo/_base/declare', 'dojo/_base/url', 'dojo/_base/array', 'dojo/_base/
 		 function(err) {
 		  console.log(err);
 		});
-	},
-
-	updateCategory: function(action) {
-		if (!registry.byId('category').validate()) {
-			return false;
-		}
-	  	domConstruct.empty('progressbarContainer');
-	  	domStyle.set('fileList', 'display', 'block');
-		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
-		  function(res) {
-		  	topic.publish("toasterMessage", {
-      				message: (res.err ? res.err : res.msg),
-       			type: (res.err ? 'fatal' : 'message'),
-      				duration: 1000
-    			 });
-			dom.getId('categoryId').value = res.category.id;
-		 },
-		 function(err) {
-		  console.log(err);
-		 });
 	},
 
 	updateCategory: function(action) {

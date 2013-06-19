@@ -138,6 +138,7 @@ function initExpress() {
 
 		var acceptedImgTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 		var filesDone = 0;
+		var socket = sockets[req.body.socketId];
 
 		if (!req.files.uploadedFiles) {
 			res.json({err: 'No file provided'});
@@ -148,30 +149,31 @@ function initExpress() {
 		} else {
 			var ulf = req.files.uploadedFiles;
 		}
+		socket.send('Traitement des images');
 		ulf.forEach(function(f) {
 			if (f.size === 0) {
 				res.json({err: 'File is empty'});
 			}
 			if (f.type == 'application/zip') {
-				var files = photodono.processZip(f.path, req.body.categoryId, sockets[req.body.socketId], function(err) {
+				var files = photodono.processZip(f.path, req.body.categoryId, socket, function(err) {
 					filesDone += 1;
 					if (ulf.length  == filesDone) {
-						photodono.getImagesFromCategory(req.body.categoryId, 'small', function(ret) {
-							console.log(ret);
+						photodono.getImagesFromCategory(req.body.categoryId, 'small', null, null, function(ret) {
 							return res.json(ret);
 						});
 					}
 				});
 			}
 			if (acceptedImgTypes.indexOf(f.type) != -1) {
-				photodono.processImage(fs.readFileSync(f.path), f.name, req.body.categoryId, sockets[req.body.socketId], function(err) {
+				photodono.processImage(fs.readFileSync(f.path), f.name, req.body.categoryId, socket, function(err) {
 					filesDone += 1;
-					console.log(ulf.length+' -- '+f.name+' -- '+f.type+' -- '+filesDone);
 					if (ulf.length  == filesDone) {
-						photodono.getImagesFromCategory(req.body.categoryId, 'small', function(ret) {
+						photodono.getImagesFromCategory([req.body.categoryId], 'small', null, null, function(ret) {
 							return res.json(ret);
 						});
 					}
+					// Delete Image
+					fs.unlinkSync(f.path);
 				});
 			}
 		});
