@@ -53,7 +53,7 @@ var _ = require('underscore');
 	/*this.ImageType.hasMany(this.Image);
 	this.Image.hasMany(this.ImageType);*/
 
-	sequelize.sync(/*{force: true}*/).success(function() {
+	sequelize.sync({force: true}).success(function() {
 		console.log('Database synchronized.')
 		// Check if root category exists or create it
 		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
@@ -226,20 +226,24 @@ photodono.prototype = {
 			var destImg = destDir+path.sep+m[4]+'.'+fileExt;
 			// Create directory if needed
 			if (!fs.existsSync(destDir)) {
-				mkdirp.sync(destDir)
+				mkdirp.sync(destDir);
 			}
-			gm(buffer, filename).resize(imgtype.width, imgtype.height).write(destImg, function(err) {
-				if (err)
+			gm(buffer).resize(imgtype.width, imgtype.height+'>').thumbnail(imgtype.width, imgtype.height).gravity('center').extent(imgtype.width, imgtype.height).write(destImg, function(err) {
+				if (err) {
+					console.log(err);
 					return cb(err);
+				}
 				if (filesDone == 0) {
 					var toBeInserted = {name: filename, active: 1, path: imgPath};
 					self.Image.findOrCreate({path: imgPath}, toBeInserted).success(function(img) {
 						self.Category.find(categoryId).success(function(category) {
 							img.addCategory(category);
 						}).error(function(err) {
+							console.log(err);
 							return cb(err);
 						});
 					}).error(function(err) {
+						console.log(err);
 						return cb(err);
 					});
 				} 

@@ -39,7 +39,7 @@ block append body
 
 	div(data-dojo-type='dojox/widget/Toaster', data-dojo-props="positionDirection:'tr-down', duration:0, messageTopic:'toasterMessage'", id="toaster")
 
-	div(data-dojo-type='dijit/Dialog', data-dojo-id='uploadDialog', title='Envoyer des images')
+	div(data-dojo-type='dijit/Dialog', id='uploadDialog', data-dojo-id='uploadDialog', title='Envoyer des images')
 		form(method='post', action='/upload',  data-dojo-type='dijit/form/Form', data-dojo-id='files', enctype='multipart/form-data', id='filesForm')
 			input(type='hidden', data-dojo-type='dijit/form/TextBox', name='categoryId', id='categoryId')
 			input(type='hidden', data-dojo-type='dijit/form/TextBox', name='socketId', id='socketId')

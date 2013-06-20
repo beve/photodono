@@ -99,14 +99,14 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 	filesSent: function(thumbs) {
 	  	domConstruct.empty('progressbarContainer');
 	  	this.displayThumbnails(thumbs);
+			registry.byId('uploadDialog').hide();
 	},
 
 	displayThumbnails: function(thumbs) {
-		console.log(thumbs);
 		var thumbsDir = dom.byId('thumbsContainer');
 		domConstruct.empty(thumbsDir);
-		if (typeof(thumbs.files == 'array') && thumbs.files.length > 0) {
-			thumbs.files.forEach(function(thumb) {
+		if (thumbs.images && thumbs.images.length > 0) {
+			thumbs.images.forEach(function(thumb) {
 				var div = domConstruct.create('div', {class: "thumb"}, thumbsDir);
 				var img = domConstruct.create('img', {src: thumbs.path+'/'+thumb.path, class: 'thumb'}, div);
 			});

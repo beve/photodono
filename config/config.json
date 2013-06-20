@@ -8,7 +8,7 @@
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
 	"staticdir": "public",
-	"imgdir": "Photos",
+	"imgdir": "public/Photos",
 	"imgtypes":  [
 			{
 				"name": "small",
@@ -35,12 +35,12 @@
 		"host": "localhost",
 		"port": 3306,
 		"user": "photodono",
-		"password": "photoP4SS",
+		"password": "photoP4SS2",
 		"query": {
 			"pool" : false,
 			"debug" : false
 		},
-		"logging": false
+		"logging": true 
 	},
   	"pass": "pouet"
 }
