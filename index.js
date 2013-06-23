@@ -2,7 +2,6 @@ var fs = require('fs');
 var express = require('express');
 var photodono = require('./src/server/photodono');
 var app = express();
-//var server = require('http').Server(app);
 var path = require('path');
 var util = require('util');
 var _ = require('underscore');
@@ -23,11 +22,10 @@ if (!fs.existsSync(configFile)) {
 }
 
 // Init photodono
-	var photodono = new photodono(config);
+var photodono = new photodono(config);
 // Store sockets
-	var sockets = {};
+var sockets = {};
 // Init express
-
 initExpress();
 
 // Plug real authentification

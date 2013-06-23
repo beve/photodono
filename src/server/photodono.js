@@ -39,19 +39,8 @@ var _ = require('underscore');
 		active: { type: Sequelize.BOOLEAN, default: false}
 	});
 
-	/*
-	this.ImageType = sequelize.define('ImageType', {
-		name: {type: Sequelize.STRING, unique: true, allowNull: false},
-		width: {type: Sequelize.INTEGER, allowNull: false},
-		height: {type: Sequelize.INTEGER, allowNull: false},
-		dir: {type: Sequelize.STRING, unique: true, allowNull: false}
-	});
-	*/
-
 	this.Image.hasMany(this.Category);
 	this.Category.hasMany(this.Image);
-	/*this.ImageType.hasMany(this.Image);
-	this.Image.hasMany(this.ImageType);*/
 
 	sequelize.sync({force: true}).success(function() {
 		console.log('Database synchronized.')
@@ -63,20 +52,6 @@ var _ = require('underscore');
 			// Populate categories
 			self.populateCategories();
 		});
-		/*
-		// Create default images types
-		self.config.imgtypes.forEach(function(imgtype) {
-			self.ImageType.findOrCreate({name: imgtype.name}, {name: imgtype.name, width: imgtype.width, height: imgtype.height, dir: imgtype.dir}).success(function(it, created) {
-				if (created) {
-					var destDir = path.normalize(self.imgdir+path.sep+imgtype.dir);
-					if (!fs.existsSync(destDir)) {
-						mkdirp.sync(destDir)
-					}
-					console.log('Image type created: '+it.name);
-				}	
-			});
-		});
-		*/
 	}).error(function(error) {
 		console.log('Database sync error: '+error);
 	})
@@ -227,11 +202,12 @@ photodono.prototype = {
 		this.config.imgtypes.forEach(function(imgtype) {
 			var destDir = path.normalize(imgdir+path.sep+imgtype.dir+path.sep+m[1]+path.sep+m[2]+path.sep+m[3]);
 			var destImg = destDir+path.sep+m[4]+'.'+fileExt;
+			var crop = (imgtype.crop) ? '^' : '';
 			// Create directory if needed
 			if (!fs.existsSync(destDir)) {
 				mkdirp.sync(destDir);
 			}
-			gm(buffer).resize(imgtype.width, imgtype.height+'>').thumbnail(imgtype.width, imgtype.height).gravity('center').extent(imgtype.width, imgtype.height).write(destImg, function(err) {
+			gm(buffer).resize(imgtype.width, imgtype.height+'>').thumbnail(imgtype.width, imgtype.height+crop).gravity('center').extent(imgtype.width, imgtype.height).write(destImg, function(err) {
 				if (err) {
 					console.log(err);
 					return cb(err);
