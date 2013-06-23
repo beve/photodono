@@ -7,26 +7,40 @@
 	},
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
-	"photosdir": "public/Photos",
-	"thumb": {
-		"w" : 200,
-		"h" : 200
-	},
-	"photo" : {
-		"w" : 600,
-		"h" : 600
-	},
+	"staticdir": "public",
+	"imgdir": "public/Photos",
+	"imgtypes":  [
+			{
+				"name": "small",
+				"width": 200,
+				"height": 200,
+				"dir": "s"
+			},
+			{
+				"name": "medium",
+				"width": 400,
+				"height": 400,
+				"dir": "m"
+			},
+			{
+				"name": "big",
+				"width": 800,
+				"height": 800,
+				"dir": "b"
+			}
+		],
 	"database": {
-		"datábase": "photodono",
-		"protocol": "postgres",
+		"database": "photodono",
+		"protocol": "mysql",
 		"host": "localhost",
-		"port": "3306",
+		"port": 3306,
 		"user": "photodono",
-		"password": "photoP4SS",
+		"password": "YOUR_PASS",
 		"query": {
 			"pool" : false,
 			"debug" : false
-		}
+		},
+		"logging": false 
 	},
   	"pass": "pouet"
 }

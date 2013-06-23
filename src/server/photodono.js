@@ -198,12 +198,15 @@ photodono.prototype = {
 		i = 0;
 		zipEntries.forEach(function(zipEntry) {
 			if (zipEntry.isDirectory == false) {
-				var buffer = zip.readFile(zipEntry);
-				self.processImage(buffer, zipEntry.entryName, categoryId, socket, function(err) {
-					i++;
-					if (i == zipEntries.length) {
-						return cb(err);
-					}
+				zip.readFileAsync(zipEntry, function(buffer) {
+					self.processImage(buffer, zipEntry.entryName, categoryId, socket, function(err) {
+						i++;
+						if (i == zipEntries.length) {
+							fs.unlink(file, function() {
+								return cb(err);
+							});
+						}
+					});
 				});
 			}
 		});
