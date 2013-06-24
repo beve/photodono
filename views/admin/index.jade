@@ -28,7 +28,18 @@ block append body
 
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'center'", id='mainContent')
 			div(data-dojo-type='dijit/layout/ContentPane', data-dojo-props="region:'bottom', splitter:true", id='thumbPane')
-				input(data-dojo-type='dijit/form/Button', id='btnAddImages', data-dojo-props='onClick:function(){uploadDialog.show();}', label='+')
+				div(class="menu clearfix")
+					div.left
+						a#linkAddImages(onclick='uploadDialog.show();') Ajouter des images
+					div.right	
+						span Tri: 
+						span(data-dojo-type='dijit/form/Select', data-dojo-props='')
+							span(value='pos+') Position croissant
+							span(value='pos-') Position décroissant
+							span(value='a-z') A-Z 
+							span(value='z-a') Z-A 
+							span(value='add') Dernières ajoutées
+							span(value='mod-') Dernières modifiées 
 				div#thumbsContainer(class='clearfix')
 
 	div(data-dojo-type='dijit/Dialog', id='popupDelete', title='Delete')

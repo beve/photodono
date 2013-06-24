@@ -14,6 +14,7 @@ module.exports = function(grunt) {
 					imagesDir: 'public/img',
 					fontsDir: 'public/fonts',
 					app: 'stand_alone',
+					outputStyle: 'nested',
 					environment: 'production'
 				}
 			}

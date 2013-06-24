@@ -42,7 +42,7 @@ var _ = require('underscore');
 	this.Image.hasMany(this.Category);
 	this.Category.hasMany(this.Image);
 
-	sequelize.sync({force: true}).success(function() {
+	sequelize.sync({force: false}).success(function() {
 		console.log('Database synchronized.')
 		// Check if root category exists or create it
 		self.Category.findOrCreate({id: 1}, {name: 'root', description: 'Top level category', position: 0}).success(function(category, created) {
@@ -131,38 +131,6 @@ photodono.prototype = {
 				cb({images: images, path: self.config.imgdir+path.sep+_.where(self.config.imgtypes, {name: fileType})[0].dir});
 			});
 		});
-	},
-
-	getList: function(photosdir, listFiles, callback) {
-		var aDir = ['/'];
-		var dirNum = 0;
-		var fileNum = 1000;
-		var finder = findit.find(photosdir);
-		var self = this;
-		var objectStoreModel = [{id: 0, name: 'root', type: 'dir'}];
-		findit.sync(photosdir, {}, function(found, stat) {
-			if (stat.isDirectory()) {
-				var tmp = found.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
-				var parent = 0;
-				tmp.forEach(function(dir, idx) {
-					if (aDir.indexOf(dir) == -1) {
-						dirNum = aDir.length;
-						aDir.push(dir);
-						objectStoreModel.push({id: dirNum, name: dir, type: 'dir', path: found.replace(photosdir, ''), parent: parent});
-					} else {
-						parent = aDir.indexOf(dir);
-					}
-				});
-			}
-			if (listFiles && stat.isFile()) {
-				var tmp = found.split(path.sep).slice(photosdir.split(path.sep).length, this.length);
-				f = tmp.pop();
-				d = tmp.pop();
-				objectStoreModel.push({id: fileNum, name: f, type: 'file', path: found.replace(photosdir, ''), parent: aDir.indexOf(d), md5: crypto.createHash('md5').update(fs.readFileSync(found, 'binary')).digest('hex')});
-				fileNum++;
-			}
-		});
-		self.list = objectStoreModel;
 	},
 
 	processZip: function(file, categoryId, socket, cb) {

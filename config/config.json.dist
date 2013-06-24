@@ -8,7 +8,7 @@
 	"secret": "sdqreiowqurqiEOUIrepw(*$(*@899832#&$",
 	"tmpdir": "tmp",
 	"staticdir": "public",
-	"imgdir": "public/Photos",
+	"imgdir": "Photos",
 	"imgtypes":  [
 			{
 				"name": "small",

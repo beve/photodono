@@ -103,7 +103,7 @@ function initExpress() {
 		console.log(req.query);
 		order = req.query.order || null;
 		limit = req.query.limit || null;
-		res.json(photodono.getImagesFromCategory(req.query.categoryId, 'small', order, limit, function(thumbs) {
+		res.json(photodono.getImagesFromCategory(req.query.categoryId, 'thumb', order, limit, function(thumbs) {
 			res.json(thumbs);
 		}));
 	});
@@ -165,7 +165,7 @@ function initExpress() {
 				var files = photodono.processZip(f.path, req.body.categoryId, socket, function(err) {
 					filesDone += 1;
 					if (ulf.length  == filesDone) {
-						photodono.getImagesFromCategory(req.body.categoryId, 'small', null, null, function(ret) {
+						photodono.getImagesFromCategory(req.body.categoryId, 'thumb', null, null, function(ret) {
 							return res.json(ret);
 						});
 					}
@@ -175,7 +175,7 @@ function initExpress() {
 				photodono.processImage(fs.readFileSync(f.path), f.name, req.body.categoryId, socket, function(err) {
 					filesDone += 1;
 					if (ulf.length  == filesDone) {
-						photodono.getImagesFromCategory([req.body.categoryId], 'small', null, null, function(ret) {
+						photodono.getImagesFromCategory([req.body.categoryId], 'thumb', null, null, function(ret) {
 							return res.json(ret);
 						});
 					}

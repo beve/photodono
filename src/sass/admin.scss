@@ -1,12 +1,7 @@
 @import "compass/utilities/general/clearfix";
 
 #helpPane {
-	height: 200px;
-}
-
-#thumbPane {
 	height: 100px;
-	display: none;
 }
 
 .treeTitle {
@@ -38,11 +33,28 @@ h1 {
 }
 
 
+#thumbPane {
+	height: 150px;
+	display: none;
+	.menu {
+		height: 10px;
+		.left {
+			border: 1px solid red;
+			float: left;
+			width: 50%;
+		}
+		.right {
+			float: right;
+			width: 50%;
+		}
+	}
+}
+
 .thumbsContainer {
 	position: relative;
 }
 
-#btnAddImages {
+#linkAddImages {
 	position: absolute;
 	width: 10px;
 	height: 10px;
@@ -59,3 +71,4 @@ h1 {
 		margin-left: 0
 	}
 }
+

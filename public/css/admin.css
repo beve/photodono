@@ -1,1 +1,56 @@
-#helpPane{height:200px}#thumbPane{height:100px;display:none}.treeTitle{font-weight:bold;margin-bottom:5px}#category td{padding:5px 0}h1{margin:0 0 20px 0}.dojoxUploaderFileListTable{display:none}.dojoxUploaderFileList{height:auto !important;min-height:auto !important;margin:10px 0;border:none !important}#currentAction{font-weight:bold}.thumbsContainer{position:relative}.thumb{float:left;width:100px;height:100px;margin-left:5px}.thumb :nth-child(1){margin-left:0}
+#helpPane {
+  height: 100px; }
+
+.treeTitle {
+  font-weight: bold;
+  margin-bottom: 5px; }
+
+#category td {
+  padding: 5px 0; }
+
+h1 {
+  margin: 0 0 20px 0; }
+
+.dojoxUploaderFileListTable {
+  display: none; }
+
+.dojoxUploaderFileList {
+  height: auto !important;
+  min-height: auto !important;
+  margin: 10px 0;
+  border: none !important; }
+
+#currentAction {
+  font-weight: bold; }
+
+#thumbPane {
+  height: 150px;
+  display: none; }
+  #thumbPane .menu {
+    height: 10px; }
+    #thumbPane .menu .left {
+      border: 1px solid red;
+      float: left;
+      width: 50%; }
+    #thumbPane .menu .right {
+      float: right;
+      width: 50%; }
+
+.thumbsContainer {
+  position: relative; }
+
+#linkAddImages {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 5px;
+  left: 5px; }
+
+.thumb {
+  float: left;
+  width: 100px;
+  height: 100px;
+  margin-left: 5px;
+  toto: tata; }
+  .thumb :nth-child(1) {
+    margin-left: 0; }
