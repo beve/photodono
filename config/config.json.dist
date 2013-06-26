@@ -11,6 +11,13 @@
 	"imgdir": "Photos",
 	"imgtypes":  [
 			{
+				"name": "thumb",
+				"width": 200,
+				"height": 200,
+				"dir": "t",
+				"crop": true 
+			},
+			{
 				"name": "small",
 				"width": 200,
 				"height": 200,
@@ -26,6 +33,12 @@
 				"name": "big",
 				"width": 800,
 				"height": 800,
+				"dir": "b"
+			},
+			{
+				"name": "store",
+				"width": 1600,
+				"height": 1600,
 				"dir": "b"
 			}
 		],
