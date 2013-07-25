@@ -1,8 +1,11 @@
 @import "compass/utilities/general/clearfix";
 
+body {
+	font-size: 12px !important;
+}
+
 .clearfix {
 	@include clearfix;
-	border: 1px solid orange;
 }
 
 #helpPane {
