@@ -1,5 +1,10 @@
 @import "compass/utilities/general/clearfix";
 
+.clearfix {
+	@include clearfix;
+	border: 1px solid orange;
+}
+
 #helpPane {
 	height: 100px;
 }
@@ -39,7 +44,6 @@ h1 {
 	.menu {
 		height: 10px;
 		.left {
-			border: 1px solid red;
 			float: left;
 			width: 50%;
 		}

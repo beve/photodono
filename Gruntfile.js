@@ -5,6 +5,10 @@ module.exports = function(grunt) {
 
 		pkg: grunt.file.readJSON('package.json'),
 		
+		watch: {
+			files: ['src/sass/*.scss'],
+			tasks: 'default'
+		},
 		compass: {
 			dist: {
 				options: {
@@ -14,8 +18,20 @@ module.exports = function(grunt) {
 					imagesDir: 'public/img',
 					fontsDir: 'public/fonts',
 					app: 'stand_alone',
-					outputStyle: 'nested',
+					outputStyle: 'compressed',
 					environment: 'production'
+				}
+			},
+			dev: {
+				options: {
+					sassDir: 'src/sass',
+					cssDir: 'public/css',
+					javascriptsDir: 'public/js',
+					imagesDir: 'public/img',
+					fontsDir: 'public/fonts',
+					app: 'stand_alone',
+					outputStyle: 'nested',
+					environment: 'development'
 				}
 			}
 		},
@@ -32,11 +48,12 @@ module.exports = function(grunt) {
 		}
 
 	});
-
-
+  	
+  	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-compass');
 	grunt.loadNpmTasks('grunt-dojo');
 
-	grunt.registerTask('default', ['compass']);
+	grunt.registerTask('default', ['compass:dist']);
+	grunt.registerTask('release', ['compass:dev']);
 
 };

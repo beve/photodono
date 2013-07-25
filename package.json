@@ -29,6 +29,7 @@
     "jshint": "*",
     "grunt": "~0.4.1",
     "grunt-contrib-compass": "~0.2.0",
+    "grunt-contrib-watch":  "latest",
     "grunt-dojo": "~0.2.4"
   },
   "engines": {
