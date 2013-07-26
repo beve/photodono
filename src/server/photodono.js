@@ -67,7 +67,7 @@ photodono.prototype = {
 	getCategory: function(id, args, cb) {
 		var self = this;
 		args = args || {};
-		this.Category.find({where: {id: id}, attributes: ['id', 'name', 'heading', 'description', 'position']}).success(function(category) {
+		this.Category.find({where: {id: id}, attributes: ['id', 'name', 'heading', 'description', 'position', 'active']}).success(function(category) {
 			category.getImages(args).success(function(images) {
 				catObj = category.selectedValues;
 				_.extend(catObj, {images:{files: images, path: self.config.imgdir+path.sep+_.where(self.config.imgtypes, {name: 'small'})[0].dir}});
@@ -78,6 +78,7 @@ photodono.prototype = {
 
 	updateCategory: function(category, cb) {
 		var self = this;
+		console.log(category);
 		this.Category.findOrCreate({id: category.id}, _.omit(category, 'id')).success(function(cat, create) {
 			if (!create) {
 				cat.updateAttributes(_.omit(category, 'id')).success(function(){

@@ -75,6 +75,7 @@ function initExpress() {
 	app.get('/category/:id', function(req, res) {
 		if (req.params.id) {
 			photodono.getCategory(req.params.id, {}, function(category) {
+				category.active = (category.active == 1) ? 'on' : 'off';
 				res.render('admin/category', category, function(err, content) {
 					res.json({content: content, images: category.images});
 				});
@@ -148,8 +149,8 @@ function initExpress() {
 		var socket = sockets[req.body.socketId];
 
 		if (!req.files.uploadedFiles) {
-			res.json({err: 'No file provided'});
-			return;
+			res.json({err: 'No file provided'});	qQ
+				return;
 		}
 		if (typeof(req.files.uploadedFiles[0][0]) == 'object') {
 			var ulf = req.files.uploadedFiles[0];

@@ -182,7 +182,9 @@ define(['dojo/_base/declare', 'photodono/main', 'dojo/_base/url', 'dojo/_base/ar
 	},
 
 	updateCategory: function(action) {
-		request.post('/category', {data: dojoForm.toObject('category'), handleAs:'json'}).then(
+		category = dojoForm.toObject('category');
+		category.active = (category.active == 'on') ? 1 : 0;
+		request.post('/category', {data: category, handleAs:'json'}).then(
 		  function(res) {
 		  	topic.publish("toasterMessage", {
       				message: (res.err ? res.err : res.msg),
