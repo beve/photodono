@@ -60,10 +60,6 @@ var _ = require('underscore');
 
 photodono.prototype = {
 
-	createCategory: function(fields, cb) {
-
-	},
-
 	getCategory: function(id, args, cb) {
 		var self = this;
 		args = args || {};
